@@ -33,12 +33,15 @@ defmodule UserManager.Mixfile do
     [{:postgrex, ">= 0.0.0"},
         {:ecto, "~> 2.1"},
         {:guardian, "~> 0.14"},
-        {:guardian_db, git: "https://github.com/ueberauth/guardian_db.git"}, {:faker, "~> 0.7"}]
+        {:guardian_db, git: "https://github.com/ueberauth/guardian_db.git"}, {:faker, "~> 0.7"}, {:credo, "~> 0.5", only: [:dev, :test]},
+        {:dialyxir, "~> 0.4", only: [:dev], runtime: false}, {:exprof, "~> 0.2.0", only: [:dev, :test]} ]
   end
 
   defp aliases do
     ["ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
      "ecto.reset": ["ecto.drop", "ecto.setup"],
-     "test": ["ecto.drop --quiet","ecto.create --quiet", "ecto.migrate", "run priv/repo/seeds.exs", "test"]]
+     "test": ["ecto.drop --quiet","ecto.create --quiet", "ecto.migrate", "run priv/repo/seeds.exs", "test"]
+     ]
+
   end
 end

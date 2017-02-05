@@ -7,10 +7,10 @@ defmodule UserManager.UserProfile.Supervisor do
 
   def start_link(arg) do
     {:ok, pid} = Supervisor.start_link(__MODULE__, arg)
-    Process.register(pid, UserManager.UserProfile.Supervisor )
+    Process.register(pid, UserManager.UserProfile.Supervisor)
     {:ok, pid}
   end
-
+  @spec api_pool_name() :: atom
   def api_pool_name() do
     :user_profile_api_pool
   end
@@ -19,8 +19,8 @@ defmodule UserManager.UserProfile.Supervisor do
     poolboy_config = [
         {:name, {:local, api_pool_name()}},
         {:worker_module, UserManager.UserProfileApiWorker},
-        {:size, 2},
-        {:max_overflow, 1}
+        {:size, Application.get_env(:user_manager, :user_profile_workers)},
+        {:max_overflow, Application.get_env(:user_manager, :user_profile_max_overflow)}
       ]
     children = [
       :poolboy.child_spec(api_pool_name(), poolboy_config, []),

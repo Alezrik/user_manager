@@ -4,6 +4,7 @@ defmodule UserManager.Authentication.Supervisor do
 """
   
   use Supervisor
+  @spec api_pool_name() :: atom
   def api_pool_name() do
     :authentication_api_pool
   end
@@ -14,13 +15,12 @@ defmodule UserManager.Authentication.Supervisor do
   end
 
 
-
   def init(arg) do
     poolboy_config = [
         {:name, {:local, api_pool_name()}},
         {:worker_module, UserManager.AuthenticationApiWorker},
-        {:size, 2},
-        {:max_overflow, 1}
+        {:size, Application.get_env(:user_manager, :authenticate_workers)},
+        {:max_overflow, Application.get_env(:user_manager, :authenticate_max_overflow)}
       ]
     children = [
       #worker(poolboy_config, []),

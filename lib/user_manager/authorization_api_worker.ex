@@ -8,16 +8,15 @@ defmodule UserManager.AuthorizationApiWorker do
   def start_link(state, opts \\ []) do
     GenServer.start_link(__MODULE__, state, opts)
   end
-
   def init(_opts) do
     {:ok, %{}}
   end
+  @spec authorize_all_claims(Pid.t, String.t, Enum.t, atom) :: {atom}
   def authorize_all_claims(pid, token, claims_list, authentication_source) do
-    GenServer.call(pid, {:authorize_all, token, claims_list, authentication_source})
+    GenServer.call(pid, {:authorize_all, token, claims_list, authentication_source}, Application.get_env(:user_manager, :authorization_request_timeout))
   end
-  def authorize_any_claims(pid, token, claims_list, authentication_source) do
-
-  end
+  #@spec authorize_any_claims(Pid.t, String.t, Enum.t, atom) :: {atom}
+  #def authorize_any_claims(pid, token, claims_list, authentication_source)
   def handle_call({:authorize_all, token, claims_list, authentication_source}, _from, state) do
     response = case Guardian.decode_and_verify(token) do
           {:error, reason} -> {:error}
@@ -35,11 +34,5 @@ defmodule UserManager.AuthorizationApiWorker do
     end
     {:reply, response, state}
   end
-  def handle_call(_msg, _from, state) do
-    {:reply, :ok, state}
-  end
 
-  def handle_cast(_msg, state) do
-    {:noreply, state}
-  end
 end

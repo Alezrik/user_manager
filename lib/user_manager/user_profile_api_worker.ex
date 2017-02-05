@@ -12,28 +12,28 @@ defmodule UserManager.UserProfileApiWorker do
   def start_link(state, opts \\ []) do
     GenServer.start_link(__MODULE__, state, opts)
   end
-
   def init(_opts) do
     {:ok, %{}}
   end
+  @spec create_user(Pid.t, String.t, String.t) :: {atom, UserManager.User}
   def create_user(pid, name, password) do
-    GenServer.call(pid, {:create_user, name, password})
+    GenServer.call(pid, {:create_user, name, password}, Application.get_env(:user_manager, :user_profile_request_timeout))
   end
   def handle_call({:create_user, name, password}, _from, state) do
     alias Permission
     user_changeset = User.changeset(%User{}, %{"name" => name, "password" => password})
     case create_user_from_changeset(user_changeset, user_changeset.valid?) do
-      {:error, errors} ->{:reply, {:error, errors}, state}
+      {:error, errors}  -> {:reply, {:error, errors}, state}
       {:ok, insert} ->
-        default_permissions = get_default_permissions()
-        Enum.each(default_permissions, fn p ->
-          u_list = [insert | p.users]
-          changeset = Permission.changeset(p, %{}) |> put_assoc(:users, u_list)
-          Repo.update(changeset)
-         end)
+        get_default_permissions() |> Stream.each(fn p ->
+          changeset = p |> Permission.changeset(%{})
+          |> put_assoc(:users, [insert | p.users])
+          |> Repo.update
+         end) |> Enum.to_list
         {:reply, {:ok, insert}, state}
     end
   end
+  @spec get_default_permissions() :: Enum.t
   defp get_default_permissions() do
     alias UserManager.PermissionGroup
     group = PermissionGroup
@@ -44,17 +44,12 @@ defmodule UserManager.UserProfileApiWorker do
     Enum.map(permissions, fn x -> x |> Repo.preload(:users) end)
 
   end
+  @spec create_user_from_changeset(Map.t, true) :: {atom, UserManager.User}
   defp create_user_from_changeset(user_changeset, true) do
     Repo.insert(user_changeset)
   end
+  @spec create_user_from_changeset(Map.t, false) :: {atom, Enum.t}
   defp create_user_from_changeset(user_changeset, false) do
     {:error, user_changeset.errors}
-  end
-  def handle_call(_msg, _from, state) do
-    {:reply, :ok, state}
-  end
-
-  def handle_cast(_msg, state) do
-    {:noreply, state}
   end
 end

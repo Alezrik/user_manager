@@ -8,7 +8,7 @@ defmodule UserManager.Repo.Migrations.InitialUserTable do
       timestamps()
     end
     create unique_index(:users, :name)
-    create table(:tokens, primary_key: false) do
+    create table(:guardian_tokens, primary_key: false) do
       add :jti, :string, primary_key: true
       add :aud, :string, primary_key: true
       add :typ, :string

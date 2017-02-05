@@ -12,12 +12,15 @@ defmodule AuthenticationApiTest do
       end
     end
     test "authenticate and identify user" do
+
       {:ok, token} = UserManager.AuthenticationApi.authenticate_user("testuser1", "testpassword1")
       {:ok, user} = UserManager.AuthenticationApi.identify_user(token)
+
       assert user != nil
       assert user.id > 0
       assert user.name == "testuser1"
       assert user.password == "testpassword1"
+
     end
     test "invalid authenticate" do
       {:error} = UserManager.AuthenticationApi.authenticate_user("testuser1", "")

@@ -21,7 +21,6 @@ defmodule UserManager.User do
     many_to_many :permissions, UserManager.Permission, join_through: "permissions_to_users"
     timestamps()
   end
-
   def changeset(user, params \\ %{}) do
     user
     |> cast(params, [:name, :password])
