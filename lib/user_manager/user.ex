@@ -27,5 +27,6 @@ defmodule UserManager.User do
     |> validate_required([:name, :password])
     |> validate_length(:name, min: 2, max: 30)
     |> validate_length(:password, min: 8)
+    |> unique_constraint(:name)
   end
 end

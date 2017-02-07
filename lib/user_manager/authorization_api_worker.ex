@@ -18,9 +18,13 @@ defmodule UserManager.AuthorizationApiWorker do
   #@spec authorize_any_claims(Pid.t, String.t, Enum.t, atom) :: {atom}
   #def authorize_any_claims(pid, token, claims_list, authentication_source)
   def handle_call({:authorize_all, token, claims_list, authentication_source}, _from, state) do
+    Logger.debug "!!!! Authorize all !!!!"
     response = case Guardian.decode_and_verify(token) do
-          {:error, reason} -> {:error}
+          {:error, reason} ->
+            Logger.debug "decode error: #{inspect reason}"
+            {:error}
             {:ok, data} ->
+                Logger.debug "got data: #{inspect data}"
                 claims_result = Enum.map(claims_list, fn c ->
                    {group_name, permission} = c
                    p = data
@@ -32,6 +36,7 @@ defmodule UserManager.AuthorizationApiWorker do
                    false -> {:ok}
                  end
     end
+    Logger.debug "response: #{inspect response}"
     {:reply, response, state}
   end
 

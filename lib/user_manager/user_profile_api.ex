@@ -2,7 +2,7 @@ defmodule UserManager.UserProfileApi do
   @moduledoc """
   external api for UserProfile related tasks
 """
-  
+  require Logger
   use GenServer
   def start_link(state, opts) do
     GenServer.start_link(__MODULE__, state, opts)
@@ -12,12 +12,17 @@ defmodule UserManager.UserProfileApi do
   end
   @spec create_user(String.t, String.t) :: {atom, UserManager.User | Enum.t}
   def create_user(name, password) do
-    :poolboy.transaction(
-          UserManager.UserProfile.Supervisor.api_pool_name(),
-          fn pid ->
-            UserManager.UserProfileApiWorker.create_user(pid, name, password)
-           end,
-           :infinity
-        )
+      raw_task_data = Task.Supervisor.async(UserManager.UserProfile.Task.Supervisor, fn ->
+      GenServer.cast(UserManager.UserProfile.CreateUserWorkflowProducer, {:create_user, name, password, self()})
+      receive do
+        some_msg -> some_msg
+      end
+    end) |> Task.await(60000)
+    case raw_task_data do
+      {:ok, task_data} -> {:ok, task_data}
+      {:error, error_data} -> {:error, :task_error, error_data}
+      {:error, error_tag, error_data} -> {:error, error_tag, error_data}
+    end
+
   end
 end

@@ -13,10 +13,11 @@ defmodule UserManager.Application do
     children = [
       # Starts a worker by calling: UserManager.Worker.start_link(arg1, arg2, arg3)
       # worker(UserManager.Worker, [arg1, arg2, arg3]),
+      worker(UserManager.Repo, []),
       supervisor(UserManager.Authentication.Supervisor, [:ok]),
       supervisor(UserManager.UserProfile.Supervisor , [:ok]),
-      supervisor(UserManager.Authorization.Supervisor, [:ok]),
-      worker(UserManager.Repo, [])
+      supervisor(UserManager.Authorization.Supervisor, [:ok])
+
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

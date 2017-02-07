@@ -4,7 +4,7 @@ defmodule AuthorizeApiTest do
       alias UserManager.User
       require Logger
       setup_all context do
-        name = Faker.Name.first_name
+        name = Faker.Name.first_name<>Faker.Name.last_name<>"007"
         {:ok, user} = UserManager.UserProfileApi.create_user(name, "testpassword1")
         {:ok, token} = UserManager.AuthenticationApi.authenticate_user(name, "testpassword1")
         [token: token]

@@ -34,7 +34,7 @@ defmodule UserManager.Mixfile do
         {:ecto, "~> 2.1"},
         {:guardian, "~> 0.14"},
         {:guardian_db, git: "https://github.com/ueberauth/guardian_db.git"}, {:faker, "~> 0.7"}, {:credo, "~> 0.5", only: [:dev, :test]},
-        {:dialyxir, "~> 0.4", only: [:dev], runtime: false}, {:exprof, "~> 0.2.0", only: [:dev, :test]} ]
+        {:dialyxir, "~> 0.4", only: [:dev], runtime: false}, {:exprof, "~> 0.2.0", only: [:dev, :test]}, {:gen_stage, "~> 0.11"}, {:flow, "~> 0.11"} ]
   end
 
   defp aliases do

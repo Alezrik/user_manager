@@ -4,7 +4,10 @@ defmodule UserManager.UserProfile.Supervisor do
 """
   
   use Supervisor
-
+  @max_data_validators  10
+  @max_repo_inserts 10
+  @max_user_permissions 10
+  @max_user_notification 10
   def start_link(arg) do
     {:ok, pid} = Supervisor.start_link(__MODULE__, arg)
     Process.register(pid, UserManager.UserProfile.Supervisor)
@@ -16,17 +19,19 @@ defmodule UserManager.UserProfile.Supervisor do
   end
   def init(arg) do
 
-    poolboy_config = [
-        {:name, {:local, api_pool_name()}},
-        {:worker_module, UserManager.UserProfileApiWorker},
-        {:size, Application.get_env(:user_manager, :user_profile_workers)},
-        {:max_overflow, Application.get_env(:user_manager, :user_profile_max_overflow)}
-      ]
+
     children = [
-      :poolboy.child_spec(api_pool_name(), poolboy_config, []),
-      worker(UserManager.UserProfileApi, [:ok, [name: UserManager.UserProfileApi]])
+      supervisor(Task.Supervisor, [[name: UserManager.UserProfile.Task.Supervisor]]),
+      worker(UserManager.UserProfileApi, [:ok, [name: UserManager.UserProfileApi]]),
+      #CreateUserWorkflow
+      worker(UserManager.UserProfile.CreateUserWorkflowProducer, [:ok]),
+      worker(UserManager.UserProfile.CreateUserDataValidator, [:ok]),
+      worker(UserManager.UserProfile.CreateUserRepoInsert, [:ok]),
+      worker(UserManager.UserProfile.CreateUserPermissions, [:ok]),
+      worker(UserManager.UserProfile.CreateUserNotification, [:ok])
     ]
 
-    supervise(children, strategy: :one_for_one)
+    supervise(children,
+           strategy: :one_for_one)
   end
 end
