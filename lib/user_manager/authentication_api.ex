@@ -10,24 +10,21 @@ defmodule UserManager.AuthenticationApi do
   def init(_opts) do
     {:ok, %{}}
   end
-  @spec authenticate_user(String.t, String.t, atom) :: {atom, UserManager.User | String.t}
-  def authenticate_user(name, password, authenticate_source \\ :browser) do
-    :poolboy.transaction(
-        UserManager.Authentication.Supervisor.api_pool_name(),
-        fn pid ->
-          UserManager.AuthenticationApiWorker.authenticate_user(pid, name, password, authenticate_source)
-         end,
-         :infinity
-      )
+  def authenticate_user_workflow(name, password, authentication_source \\ :browser) do
+    raw_task_data = Task.Supervisor.async(UserManager.UserProfile.Task.Supervisor, fn ->
+      UserManager.Authenticate.AuthenticateUserWorkflowProducer.authenticate_user(name, password, authentication_source, self())
+      receive do
+        some_msg -> some_msg
+      end
+    end) |> Task.await(60_000)
   end
-  @spec identify_user(String.t, atom) :: {atom}
-  def identify_user(token, authenticate_source \\ :browser) do
-     :poolboy.transaction(
-            UserManager.Authentication.Supervisor.api_pool_name(),
-            fn pid ->
-              UserManager.AuthenticationApiWorker.identify_user(pid, token, authenticate_source)
-             end,
-             :infinity
-          )
+  def identify_user_workflow(token) do
+    raw_task_data = Task.Supervisor.async(UserManager.UserProfile.Task.Supervisor, fn ->
+      UserManager.Identify.IdentifyUserProducer.identify_user(token, self())
+      receive do
+        some_msg -> some_msg
+      end
+    end) |> Task.await(60_000)
   end
+
 end

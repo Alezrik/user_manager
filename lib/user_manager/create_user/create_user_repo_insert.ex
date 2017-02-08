@@ -1,4 +1,4 @@
-defmodule UserManager.UserProfile.CreateUserRepoInsert do
+defmodule UserManager.CreateUser.CreateUserRepoInsert do
   @moduledoc false
   use GenStage
   alias UserManager.Repo
@@ -9,7 +9,7 @@ defmodule UserManager.UserProfile.CreateUserRepoInsert do
      end
   def init(stat) do
 
-    {:producer_consumer, [], subscribe_to: [UserManager.UserProfile.CreateUserDataValidator]}
+    {:producer_consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserDataValidator]}
   end
   def handle_events(events, from, state) do
     process_events = events

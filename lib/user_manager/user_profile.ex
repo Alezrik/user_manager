@@ -24,11 +24,12 @@ defmodule UserManager.UserProfile.Supervisor do
       supervisor(Task.Supervisor, [[name: UserManager.UserProfile.Task.Supervisor]]),
       worker(UserManager.UserProfileApi, [:ok, [name: UserManager.UserProfileApi]]),
       #CreateUserWorkflow
-      worker(UserManager.UserProfile.CreateUserWorkflowProducer, [:ok]),
-      worker(UserManager.UserProfile.CreateUserDataValidator, [:ok]),
-      worker(UserManager.UserProfile.CreateUserRepoInsert, [:ok]),
-      worker(UserManager.UserProfile.CreateUserPermissions, [:ok]),
-      worker(UserManager.UserProfile.CreateUserNotification, [:ok])
+      worker(UserManager.CreateUser.CreateUserWorkflowProducer, [:ok]),
+      worker(UserManager.CreateUser.CreateUserDataValidator, [:ok]),
+      worker(UserManager.CreateUser.CreateUserRepoInsert, [:ok]),
+      worker(UserManager.CreateUser.CreateUserPermissions, [:ok]),
+      worker(UserManager.CreateUser.CreateUserNotificationFormatter, [:ok]),
+      worker(UserManager.CreateUser.CreateUserNotification, [:ok])
     ]
 
     supervise(children,

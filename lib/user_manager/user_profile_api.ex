@@ -13,11 +13,11 @@ defmodule UserManager.UserProfileApi do
   @spec create_user(String.t, String.t) :: {atom, UserManager.User | Enum.t}
   def create_user(name, password) do
       raw_task_data = Task.Supervisor.async(UserManager.UserProfile.Task.Supervisor, fn ->
-      GenServer.cast(UserManager.UserProfile.CreateUserWorkflowProducer, {:create_user, name, password, self()})
+      GenServer.cast(UserManager.CreateUser.CreateUserWorkflowProducer, {:create_user, name, password, self()})
       receive do
         some_msg -> some_msg
       end
-    end) |> Task.await(60000)
+    end) |> Task.await(60_000)
     case raw_task_data do
       {:ok, task_data} -> {:ok, task_data}
       {:error, error_data} -> {:error, :task_error, error_data}

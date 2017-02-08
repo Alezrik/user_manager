@@ -1,4 +1,4 @@
-defmodule UserManager.UserProfile.CreateUserDataValidator do
+defmodule UserManager.CreateUser.CreateUserDataValidator do
   @moduledoc false
   use GenStage
   alias UserManager.User
@@ -8,7 +8,7 @@ defmodule UserManager.UserProfile.CreateUserDataValidator do
       GenStage.start_link(__MODULE__, [], name: __MODULE__)
   end
   def init(stat) do
-    {:producer_consumer, [], subscribe_to: [UserManager.UserProfile.CreateUserWorkflowProducer]}
+    {:producer_consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserWorkflowProducer]}
   end
   def handle_events(events, from, state) do
     process_events = events

@@ -16,16 +16,21 @@ defmodule UserManager.Authentication.Supervisor do
 
 
   def init(arg) do
-    poolboy_config = [
-        {:name, {:local, api_pool_name()}},
-        {:worker_module, UserManager.AuthenticationApiWorker},
-        {:size, Application.get_env(:user_manager, :authenticate_workers)},
-        {:max_overflow, Application.get_env(:user_manager, :authenticate_max_overflow)}
-      ]
+
     children = [
-      #worker(poolboy_config, []),
-      :poolboy.child_spec(api_pool_name(), poolboy_config, []),
-      worker(UserManager.AuthenticationApi, [:ok, [name: UserManager.AuthenticationApi]])
+      worker(UserManager.Authenticate.AuthenticateUserWorkflowProducer, [:ok]),
+      worker(UserManager.Authenticate.AuthenticateUserUserLookup, [:ok]),
+      worker(UserManager.Authenticate.AuthenticateUserValidation, [:ok]),
+      worker(UserManager.Authenticate.AuthenticateUserTokenGenerate, [:ok]),
+      worker(UserManager.Authenticate.AuthenticateUserNotificationFormatter, [:ok]),
+      worker(UserManager.Authenticate.AuthenticateUserNotification, [:ok]),
+      worker(UserManager.AuthenticationApi, [:ok, [name: UserManager.AuthenticationApi]]),
+
+      worker(UserManager.Identify.IdentifyUserProducer, [:ok]),
+      worker(UserManager.Identify.IdentifyUserValidateToken, [:ok]),
+      worker(UserManager.Identify.IdentifyUserDeserializer, [:ok]),
+      worker(UserManager.Identify.IdentifyUserNotificationFormatter, [:ok]),
+      worker(UserManager.Identify.IdentifyUserNotification, [:ok])
     ]
 
     supervise(children, strategy: :one_for_one)
