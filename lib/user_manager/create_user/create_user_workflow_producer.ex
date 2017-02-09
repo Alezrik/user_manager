@@ -10,8 +10,8 @@ defmodule UserManager.CreateUser.CreateUserWorkflowProducer do
   def init(state) do
     {:producer, {[], 0}}
   end
-  def handle_cast({:create_user, name, password, notify}, {queue, demand}) do
-    {send_events, new_state} = process_events(demand, queue, {:create_user, name, password, notify})
+  def handle_cast({:create_user, name, password, email, notify}, {queue, demand}) do
+    {send_events, new_state} = process_events(demand, queue, {:create_user, name, password, email, notify})
     {:noreply, send_events, new_state}
   end
   def handle_demand(demand, {queue, d}) when demand > 0 do

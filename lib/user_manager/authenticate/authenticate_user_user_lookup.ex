@@ -2,7 +2,8 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
   @moduledoc false
   use GenStage
   require Logger
-  alias UserManager.User
+  alias UserManager.Schemas.User
+  alias UserManager.Schemas.UserProfile
   alias UserManager.Repo
   import Ecto.Query
   def start_link(setup) do
@@ -16,11 +17,14 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
     |> Flow.from_enumerable
     |> Flow.map(fn e ->
        {:authenticate_user, name, password, source, notify} = e
-        case User
+        case UserProfile
         |> where(name: ^name)
         |> Repo.one do
           nil -> {:user_not_found_error, notify}
-          user -> {:validate_user, user, password, source, notify}
+          user_profile ->
+          profile = user_profile |> Repo.preload(:user)
+           u = profile.user |> Repo.preload(:user_profile)
+          {:validate_user, u, password, source, notify}
         end
      end)
      |> Enum.to_list

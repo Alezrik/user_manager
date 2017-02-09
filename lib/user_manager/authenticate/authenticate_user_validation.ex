@@ -2,9 +2,10 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
   @moduledoc false
   use GenStage
   require Logger
-  alias UserManager.User
+  alias UserManager.Schemas.User
   alias UserManager.Repo
   import Ecto.Query
+  alias Comeonin.Bcrypt
   def start_link(setup) do
     GenStage.start_link(__MODULE__, [], [name: __MODULE__])
   end
@@ -20,7 +21,7 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
     end)
     |> Flow.from_enumerable
     |> Flow.map(fn {:validate_user, user, password, source, notify} ->
-        case user.password == password do
+        case Bcrypt.checkpw(password, user.user_profile.password) do
           true -> {:authenticate_user, user, source, notify}
           false -> {:authenticate_failure, notify}
         end

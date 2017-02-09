@@ -1,8 +1,8 @@
 defmodule UserManager.CreateUser.CreateUserPermissions do
   @moduledoc false
   use GenStage
-  alias UserManager.Permission
-  alias UserManager.PermissionGroup
+  alias UserManager.Schemas.Permission
+  alias UserManager.Schemas.PermissionGroup
   alias UserManager.Repo
   import Ecto.Query
   import Ecto.Changeset

@@ -1,5 +1,5 @@
 defmodule PermissionSchemaTest do
   use ExUnit.Case
-  doctest UserManager.Permission
+  doctest UserManager.Schemas.Permission
 
 end

@@ -1,7 +1,7 @@
 defmodule UserManager.Authorize.AuthorizeUserValidatePermissions do
   @moduledoc false
    use GenStage
-        alias UserManager.User
+        alias UserManager.Schemas.User
         require Logger
          def start_link(setup) do
             name = "#{__MODULE__}#{setup}"

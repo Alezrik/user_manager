@@ -1,5 +1,5 @@
-alias UserManager.PermissionGroup
-alias UserManager.Permission
+alias UserManager.Schemas.PermissionGroup
+alias UserManager.Schemas.Permission
 alias UserManager.Repo
 import Ecto.Changeset
 import Ecto.Query

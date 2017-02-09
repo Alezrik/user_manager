@@ -11,7 +11,6 @@ defmodule UserManager.Identify.IdentifyUserProducer do
       {:producer, {[], 0}}
     end
     def handle_cast({:identify_user, token, notify}, {queue, demand}) do
-      Logger.debug "got something!!!!"
       {send_events, new_state} = process_events(demand, queue, {:identify_user, token, notify})
       {:noreply, send_events, new_state}
     end

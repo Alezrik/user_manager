@@ -10,14 +10,14 @@ defmodule UserManager.UserManagerApi do
   def init(_opts) do
     {:ok, %{}}
   end
-  @spec create_user(String.t, String.t) :: {atom, UserManager.User.t} | {atom, atom, String.t}
-  def create_user(name, password) do
+  @spec create_user(String.t, String.t, String.t) :: {atom, UserManager.User.t} | {atom, atom, String.t}
+  def create_user(name, password, email) do
       Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
-      GenServer.cast(UserManager.CreateUser.CreateUserWorkflowProducer, {:create_user, name, password, self()})
+      GenServer.cast(UserManager.CreateUser.CreateUserWorkflowProducer, {:create_user, name, password, email, self()})
       receive do
         some_msg -> some_msg
       end
-    end) |> Task.await(60_000)
+    end) |> Task.await(Application.get_env(:user_manager, :syncronous_api_timeout))
   end
   @spec authenticate_user(String.t, String.t, atom) :: {atom, String.t} | {atom, atom, String.t} | {atom, atom}
   def authenticate_user(name, password, authentication_source \\ :browser) do
@@ -26,17 +26,16 @@ defmodule UserManager.UserManagerApi do
       receive do
         some_msg -> some_msg
       end
-    end) |> Task.await(1000)
+    end) |> Task.await(Application.get_env(:user_manager, :syncronous_api_timeout))
   end
   @spec identify_user(String.t) :: {atom, UserManager.User.t} | {atom, atom} | {atom, atom, String.t}
   def identify_user(token) do
-    Logger.warn "state: #{inspect token}"
     Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
       GenServer.cast(UserManager.Identify.IdentifyUserProducer, {:identify_user, token, self()})
       receive do
         some_msg -> some_msg
       end
-    end) |> Task.await(1000)
+    end) |> Task.await(Application.get_env(:user_manager, :syncronous_api_timeout))
   end
   @spec authorize_claims(String.t, Enum.t, bool) :: {atom} | {atom, atom} | {atom, atom, String.t}
   def authorize_claims(token, permission_list, require_all \\ true) do
@@ -45,6 +44,6 @@ defmodule UserManager.UserManagerApi do
       receive do
         some_msg -> some_msg
       end
-    end) |> Task.await(1000)
+    end) |> Task.await(Application.get_env(:user_manager, :syncronous_api_timeout))
   end
 end

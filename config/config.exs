@@ -11,12 +11,7 @@ config :user_manager, ecto_repos: [UserManager.Repo]
 
 config :user_manager,
   new_user_default_permissions: %{default: [:read]},
-  authenticate_request_timeout: 10000,
-  authenticate_workers: 1,
-  authenticate_max_overflow: 0,
-  authorization_request_timeout: 10000,
-  authorization_workers: 1,
-  authorization_max_overflow: 0
+  syncronous_api_timeout: 60_000
 config :guardian, Guardian,
   allowed_algos: ["HS512"], # optional
   verify_module: Guardian.JWT,  # optional
