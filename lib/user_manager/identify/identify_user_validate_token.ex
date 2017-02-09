@@ -11,6 +11,7 @@ defmodule UserManager.Identify.IdentifyUserValidateToken do
       {:producer_consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserProducer]}
     end
     def handle_events(events, from, state) do
+
       process_events = events
       |> Flow.from_enumerable
       |> Flow.map(fn {:identify_user, token, notify}  ->

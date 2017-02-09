@@ -1,6 +1,6 @@
-defmodule UserManager.CreateUser.CreateUserWorkflowProducer do
+defmodule UserManager.Authorize.AuthorizeUserWorkflowProducer do
   @moduledoc """
-  Initiates the CreateUserWorkflow
+  Producer for the Authorize User Workflow
 """
   use GenStage
   require Logger
@@ -10,9 +10,9 @@ defmodule UserManager.CreateUser.CreateUserWorkflowProducer do
   def init(state) do
     {:producer, {[], 0}}
   end
-  def handle_cast({:create_user, name, password, notify}, {queue, demand}) do
-    {send_events, new_state} = process_events(demand, queue, {:create_user, name, password, notify})
-    {:noreply, send_events, new_state}
+  def handle_cast({:authorize_token, token, permission_list, require_all, notify}, {queue, demand}) do
+    {events_to_send, queued_events} = process_events(demand, queue, {:authorize_token, token, permission_list, require_all, notify})
+    {:noreply, events_to_send, queued_events}
   end
   def handle_demand(demand, {queue, d}) when demand > 0 do
     {send_events, new_state} = process_events(demand, queue, nil)

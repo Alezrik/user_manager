@@ -5,20 +5,23 @@ defmodule AuthorizeApiTest do
       require Logger
       setup_all context do
         name = Faker.Name.first_name<>Faker.Name.last_name<>"007"
-        {:ok, user} = UserManager.UserProfileApi.create_user(name, "testpassword1")
-        {:ok, token} = UserManager.AuthenticationApi.authenticate_user(name, "testpassword1")
+        {:ok, user} = UserManager.UserManagerApi.create_user(name, "testpassword1")
+        {:ok, token} = UserManager.UserManagerApi.authenticate_user(name, "testpassword1")
         [token: token]
       end
       test "authorize valid permission", context do
         token = context[:token]
-        {:ok} = UserManager.AuthorizationApi.authorize_all_claims(token, [{"default", :read}])
+        {:ok} = UserManager.UserManagerApi.authorize_claims(token, [{"default", :read}], true)
       end
       test "refuse invalid permission group", context do
         token = context[:token]
-        {:error} = UserManager.AuthorizationApi.authorize_all_claims(token, [{"invalidnotreal", :read}])
+        {:error, :unauthorized} = UserManager.UserManagerApi.authorize_claims(token, [{"invalidnotreal", :read}], true)
       end
       test "refuse invalid permission", context do
         token = context[:token]
-        {:error} = UserManager.AuthorizationApi.authorize_all_claims(token, [{"default", :invalid_not_real}])
+        {:error, :unauthorized} = UserManager.UserManagerApi.authorize_claims(token, [{"default", :invalidnotreal}], true)
+      end
+      test "invalid token" do
+        {:error, :token_decode_error} = UserManager.UserManagerApi.authorize_claims("fdsklfsakf", [{"default", :read}], true)
       end
 end

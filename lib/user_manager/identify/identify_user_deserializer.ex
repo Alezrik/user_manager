@@ -11,6 +11,7 @@ defmodule UserManager.Identify.IdentifyUserDeserializer do
         {:producer_consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserValidateToken]}
       end
       def handle_events(events, from, state) do
+
         process_events = events
         |> Enum.filter(fn  e ->
           case e do

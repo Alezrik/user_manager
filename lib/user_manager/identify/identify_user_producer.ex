@@ -1,5 +1,7 @@
 defmodule UserManager.Identify.IdentifyUserProducer do
-  @moduledoc false
+  @moduledoc """
+  Producer for IdentifyUserWorkflow
+"""
     use GenStage
     require Logger
     def start_link(setup) do
@@ -8,14 +10,13 @@ defmodule UserManager.Identify.IdentifyUserProducer do
     def init(state) do
       {:producer, {[], 0}}
     end
-    def identify_user(token, notify \\ nil) do
-      GenStage.cast(__MODULE__, {:identify_user, token, notify})
-    end
     def handle_cast({:identify_user, token, notify}, {queue, demand}) do
+      Logger.debug "got something!!!!"
       {send_events, new_state} = process_events(demand, queue, {:identify_user, token, notify})
       {:noreply, send_events, new_state}
     end
     def handle_demand(demand, {queue, d}) when demand > 0 do
+
       {send_events, new_state} = process_events(demand, queue, nil)
       {:noreply, send_events, new_state}
     end
@@ -26,6 +27,7 @@ defmodule UserManager.Identify.IdentifyUserProducer do
       {[], {[new_event], 0}}
     end
     defp process_events(demand, [], new_event) do
+
       {[new_event], {[], demand - 1}}
     end
     defp process_events(0, items_queue, new_event) do

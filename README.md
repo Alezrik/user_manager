@@ -1,15 +1,16 @@
 # UserManager
 
-**TODO: Add description**
+**A module for managing Users with Authentication and Authorization**
+
+This module is a collection of GenStage work-flows for managing Users and User Accounts.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `user_manager` to your list of dependencies in `mix.exs`:
+This is currently not deployed in hex
 
 ```elixir
 def deps do
-  [{:user_manager, "~> 0.1.0"}]
+  [{:user_manager, git: "https://github.com/Alezrik/user_manager.git"}]
 end
 ```
 

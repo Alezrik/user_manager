@@ -1,5 +1,7 @@
 defmodule UserManager.Authenticate.AuthenticateUserWorkflowProducer do
-  @moduledoc false
+  @moduledoc """
+  Producer for AuthenticateUser Workflow
+"""
 
    use GenStage
     require Logger
@@ -8,10 +10,6 @@ defmodule UserManager.Authenticate.AuthenticateUserWorkflowProducer do
     end
     def init(state) do
       {:producer, {[], 0}}
-    end
-
-    def authenticate_user(name, password, authentication_source, notify) do
-      GenServer.cast(__MODULE__, {:authenticate_user, name, password, authentication_source, notify})
     end
     def handle_cast({:authenticate_user, name, password, source, notify}, {queue, demand}) do
       {events_to_send, queued_events} = process_events(demand, queue, {:authenticate_user, name, password, source, notify})

@@ -13,6 +13,7 @@ defmodule UserManager.Identify.IdentifyUserNotificationFormatter do
         {:producer_consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserDeserializer]}
       end
       def handle_events(events, from, state) do
+
         format_events = events
         |> Flow.from_enumerable
         |> Flow.flat_map(fn e ->
