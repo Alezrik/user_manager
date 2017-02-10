@@ -11,5 +11,6 @@ addons:
   postgresql: 9.6
 before_script:
 - cp config/test.exs.travis config/test.exs
-script:
-- ./test.sh
+script: "MIX_ENV=test mix do deps.get, test"
+after_success:
+  - "mix compile && mix coveralls.travis"

@@ -8,7 +8,9 @@ defmodule UserManager.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      aliases: aliases(),
-     deps: deps()]
+     deps: deps(),
+     test_coverage: [tool: ExCoveralls],
+     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]]
   end
 
   # Configuration for the OTP application
@@ -34,7 +36,8 @@ defmodule UserManager.Mixfile do
         {:ecto, "~> 2.1"},
         {:guardian, "~> 0.14"},
         {:guardian_db, git: "https://github.com/ueberauth/guardian_db.git"}, {:faker, "~> 0.7"}, {:credo, "~> 0.5", only: [:dev, :test]},
-        {:dialyxir, "~> 0.4", only: [:dev], runtime: false}, {:gen_stage, "~> 0.11"}, {:flow, "~> 0.11"}, {:ex_doc, "~> 0.14", only: :dev}, {:comeonin, "~> 3.0"}  ]
+        {:dialyxir, "~> 0.4", only: [:dev], runtime: false}, {:gen_stage, "~> 0.11"}, {:flow, "~> 0.11"}, {:ex_doc, "~> 0.14", only: :dev}, {:comeonin, "~> 3.0"},
+          {:excoveralls, "~> 0.6", only: :test}]
   end
 
   defp aliases do
