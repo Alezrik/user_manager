@@ -27,4 +27,9 @@ defmodule AuthenticationApiTest do
     test "invalid identify" do
       {:error, :token_decode_error, _} = UserManager.UserManagerApi.identify_user("fjkdsfkljasfkjlas")
     end
+    test "valid token not saved identify" do
+         token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJVc2VyOjQiLCJleHAiOjE0ODkzMDMyMTksImlhdCI6MTQ4NjcxMTIxOSwiaXNzIjoiU29tZW9uZSIsImp0aSI6Ijg0NGUwY2EzLWM4ZWUtNDQ3Mi1iMzYxLWVhODdjNGUzYjU3NCIsInBlbSI6eyJkZWZhdWx0IjoxfSwic3ViIjoiVXNlcjo0IiwidHlwIjoiYnJvd3NlciJ9.nA3-dkFNqTW1GYO8x1v9zTQoUk6ddyK2FqgZPZk9k6lO_iIOQx6We35ItLEeRAZO_5lv9JR4WWizQ7J7p8HRcA"
+
+        {:error, :token_not_found} = UserManager.UserManagerApi.identify_user(token)
+    end
 end
