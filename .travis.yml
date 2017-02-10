@@ -11,9 +11,6 @@ addons:
   postgresql: 9.6
 before_script:
 - cp config/test.exs.travis config/test.exs
+- MIX_ENV=test mix deps.get
 - MIX_ENV=test mix ecto.create
-- MIX_ENV=test mix ecto.migrate
-- MIX_ENV=test mix run priv/repo/seeds.exs
-script: "MIX_ENV=test mix do deps.get, test"
-after_success:
-  - "MIX_ENV=test mix compile && mix coveralls.travis"
+script: "MIX_ENV=test mix coveralls.travis"
