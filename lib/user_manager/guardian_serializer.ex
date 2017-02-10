@@ -1,7 +1,5 @@
 defmodule UserManager.GuardianSerializer do
-  @moduledoc """
-  standard guardian serializer
-"""
+  @moduledoc false
   @behaviour Guardian.Serializer
 
   alias UserManager.Repo

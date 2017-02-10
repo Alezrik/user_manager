@@ -1,7 +1,5 @@
 defmodule UserManager.Authorize.AuthorizeUserWorkflowProducer do
-  @moduledoc """
-  Producer for the Authorize User Workflow
-"""
+  @moduledoc false
   use GenStage
   require Logger
   def start_link(setup) do

@@ -1,7 +1,5 @@
 defmodule UserManager.Authenticate.AuthenticateWorkflowSupervisor.Supervisor do
-  @moduledoc """
-  Supervisor for the Authenticate workflow GenStages
-"""
+  @moduledoc false
   
   use Supervisor
 

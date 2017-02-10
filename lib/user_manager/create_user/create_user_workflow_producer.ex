@@ -1,7 +1,5 @@
 defmodule UserManager.CreateUser.CreateUserWorkflowProducer do
-  @moduledoc """
-  Initiates the CreateUserWorkflow
-"""
+  @moduledoc false
   use GenStage
   require Logger
   def start_link(setup) do

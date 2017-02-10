@@ -1,7 +1,5 @@
 defmodule UserManager.Authenticate.AuthenticateUserWorkflowProducer do
-  @moduledoc """
-  Producer for AuthenticateUser Workflow
-"""
+  @moduledoc false
 
    use GenStage
     require Logger

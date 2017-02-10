@@ -1,7 +1,5 @@
 defmodule UserManager.CreateUser.CreateUserWorkflowSupervisor.Supervisor do
-  @moduledoc """
-  Supervisor for the CreateUser workflow GenStages
-"""
+  @moduledoc false
   
   use Supervisor
 

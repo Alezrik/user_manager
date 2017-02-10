@@ -1,7 +1,5 @@
 defmodule UserManager.Identify.IdentifyUserProducer do
-  @moduledoc """
-  Producer for IdentifyUserWorkflow
-"""
+  @moduledoc false
     use GenStage
     require Logger
     def start_link(setup) do

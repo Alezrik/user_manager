@@ -45,6 +45,12 @@ defmodule UserManager.Mixfile do
      "ecto.reset": ["ecto.drop", "ecto.setup"],
      "test": ["ecto.drop --quiet","ecto.create --quiet", "ecto.migrate", "run priv/repo/seeds.exs", "test"]
      ]
-
   end
+
+  defp description do
+  """
+  A User Management system for Elixir Projects
+"""
+  end
+
 end

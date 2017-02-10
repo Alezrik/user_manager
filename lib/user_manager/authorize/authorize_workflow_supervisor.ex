@@ -1,7 +1,5 @@
 defmodule UserManager.Authorize.AuthorizeWorkflowSupervisor.Supervisor do
-  @moduledoc """
-  Supervisor for AuthorizeUser Workflow
-"""
+  @moduledoc false
   
   use Supervisor
 

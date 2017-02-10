@@ -1,7 +1,5 @@
 defmodule UserManager.Identify.IdentifyUserWorkflowSupervisor.Supervisor do
-  @moduledoc """
-  Supervisor for Identify User Workflow
-"""
+  @moduledoc false
   
   use Supervisor
 
