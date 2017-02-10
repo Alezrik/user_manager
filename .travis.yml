@@ -3,5 +3,9 @@ elixir:
 - 1.4.0
 otp_release:
 - 19.2
+services:
+- postgresql
+before_script:
+- cp config/test.exs.travis config/test.exs
 script:
 - ./test.sh
