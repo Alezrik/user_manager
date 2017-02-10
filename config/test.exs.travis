@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :logger, level: :debug
+config :logger, level: :warn
 config :comeonin, :bcrypt_log_rounds, 4
 config :user_manager, UserManager.Repo,
   adapter: Ecto.Adapters.Postgres,
