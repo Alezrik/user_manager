@@ -20,3 +20,5 @@ erl_crash.dump
 *.ez
 mix.lock
 usermanager.iml
+.idea/
+fprof.trace
