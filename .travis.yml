@@ -8,7 +8,7 @@ otp_release:
 services:
 - postgresql
 addons:
-- postgresql: "9.6"
+  postgresql: 9.6
 before_script:
 - cp config/test.exs.travis config/test.exs
 script:
