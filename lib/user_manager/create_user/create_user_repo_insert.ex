@@ -12,20 +12,16 @@ defmodule UserManager.CreateUser.CreateUserRepoInsert do
     {:producer_consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserDataValidator]}
   end
   def handle_events(events, from, state) do
-    process_events = events
+    process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:insert_user)
     |> Flow.from_enumerable
-    |> Flow.map(fn e ->
-      case e do
-              {:insert_user, user_changeset, notify} ->
-              case Repo.insert(user_changeset) do
-                {:ok, user} -> {:insert_permissions, user, notify}
-                {:error, changeset} -> {:insert_error, changeset.errors, notify}
-              end
-              {:validation_error, errors, notify} ->
-               e
-            end
+    |> Flow.map(fn {:insert_user, user_changeset, notify} ->
+      case Repo.insert(user_changeset) do
+        {:ok, user} -> {:insert_permissions, user, notify}
+        {:error, changeset} -> {:insert_error, changeset.errors, notify}
+      end
      end)
     |> Enum.to_list
-    {:noreply, process_events, state}
+    un_processed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :insert_user)
+    {:noreply, process_events ++ un_processed_events, state}
   end
 end

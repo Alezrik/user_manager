@@ -9,7 +9,8 @@ defmodule UserManager.Identify.IdentifyUserNotification do
       {:consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserNotificationFormatter]}
     end
     def handle_events(events, from, state) do
-      Flow.from_enumerable(events)
+      events
+      |> Flow.from_enumerable()
       |> Flow.each(fn e ->
           case e do
             {:notify_success, :identify_user, notify, user} -> :ok = Process.send(notify, {:ok, user}, [])

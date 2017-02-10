@@ -11,47 +11,34 @@ defmodule UserManager.Authorize.AuthorizeUserValidatePermissions do
           {:producer_consumer, [], subscribe_to: [UserManager.Authorize.AuthorizeUserValidateToken]}
         end
         def handle_events(events, from, state) do
-          process_events = events
-          |> Enum.filter(fn  e ->
-            case e do
-              {:validate_permissions, data, permission_list, require_all, notify} -> true
-              other -> false
-            end
-          end)
+          process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_permissions)
           |> Flow.from_enumerable
           |> Flow.map(fn {:validate_permissions, data, permission_list, require_all, notify} ->
             permission_results = Enum.reduce_while(permission_list, false, fn {group, per_name}, acc ->
               r = data
               |> Guardian.Permissions.from_claims(group)
               |> Guardian.Permissions.all?([per_name], group)
-               case require_all do
-                 true ->
-                  case r do
-                    true -> {:cont, {true}}
-                    false -> {:halt, {false}}
-                  end
-                 false ->
-                  case r do
-                    true -> {:halt, {true}}
-                    false -> {:cont, {false}}
-                  end
-               end
+              check_permission(require_all, r)
              end)
              case permission_results do
                {true} -> {:ok, notify}
                {false} -> {:error, :unauthorized, notify}
              end
-
           end)
           |> Enum.to_list
-
-          un_processed_events = events
-          |> Enum.filter(fn  e ->
-            case e do
-              {:validate_permissions, data, permission_list, require_all, notify} -> false
-              other -> true
-            end
-          end)
+          un_processed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :validate_permissions)
           {:noreply, process_events ++ un_processed_events, state}
+        end
+        def check_permission(true, true) do
+          {:cont, {:true}}
+        end
+        def check_permission(true, false) do
+         {:halt, {false}}
+        end
+        def check_permission(false, true) do
+          {:halt, {:true}}
+        end
+        def check_permission(false, false) do
+          {:cont, {false}}
         end
 end

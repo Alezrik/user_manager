@@ -12,13 +12,7 @@ defmodule UserManager.Identify.IdentifyUserDeserializer do
       end
       def handle_events(events, from, state) do
 
-        process_events = events
-        |> Enum.filter(fn  e ->
-          case e do
-            {:deserialize_user, data, notify} -> true
-            other -> false
-          end
-        end)
+        process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:deserialize_user)
         |> Flow.from_enumerable
         |> Flow.map(fn {:deserialize_user, data, notify} ->
           case UserManager.GuardianSerializer.from_token(Map.fetch!(data, "sub")) do
@@ -27,13 +21,7 @@ defmodule UserManager.Identify.IdentifyUserDeserializer do
           end
         end)
         |> Enum.to_list
-        un_processed_events = events
-        |> Enum.filter(fn  e ->
-          case e do
-            {:deserialize_user, data, notify} -> false
-            other -> true
-          end
-        end)
+        un_processed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :deserialize_user)
         {:noreply, process_events ++ un_processed_events, state}
       end
   

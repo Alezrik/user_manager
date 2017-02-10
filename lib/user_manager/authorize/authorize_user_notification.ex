@@ -11,7 +11,8 @@ defmodule UserManager.Authorize.AuthorizeUserNotification do
         {:consumer, [], subscribe_to: [UserManager.Authorize.AuthorizeUserNotificationFormatter]}
       end
       def handle_events(events, from, state) do
-        Flow.from_enumerable(events)
+        events
+        |> Flow.from_enumerable()
         |> Flow.each(fn e ->
             case e do
               {:notify_success, :authorize_user, notify} -> :ok = Process.send(notify, {:ok}, [])

@@ -11,13 +11,13 @@ defmodule UserManager.Authenticate.AuthenticateUserNotification do
       {:consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserNotificationFormatter]}
     end
     def handle_events(events, from, state) do
-      Flow.from_enumerable(events)
+      events
+      |> Flow.from_enumerable()
       |> Flow.each(fn e ->
           case e do
             {:notify_success, :authentication, notify, token}  -> :ok = Process.send(notify, {:ok, token}, [])
             {:notify_error, :user_not_found, notify} -> :ok = Process.send(notify, {:error, :user_not_found}, [])
             {:notify_error, :authenticate_failure, notify} -> :ok = Process.send(notify, {:error, :authenticate_failure}, [])
-            other -> Logger.warn"not notifying: #{inspect other}"
           end
        end) |> Enum.to_list
 

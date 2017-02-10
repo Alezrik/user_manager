@@ -1,6 +1,8 @@
 defmodule UserManager.UserManagerApi do
   @moduledoc """
-  External API for UserManager Workflows
+  External API for UserManager Workflows.
+
+  Functionality will be exposed here as workflows are added
 """
   require Logger
   def start_link(state, opts) do
@@ -12,7 +14,7 @@ defmodule UserManager.UserManagerApi do
   end
   @spec create_user(String.t, String.t, String.t) :: {atom, UserManager.User.t} | {atom, atom, String.t}
   def create_user(name, password, email) do
-      Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
+      UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
       GenServer.cast(UserManager.CreateUser.CreateUserWorkflowProducer, {:create_user, name, password, email, self()})
       receive do
         some_msg -> some_msg
@@ -21,7 +23,7 @@ defmodule UserManager.UserManagerApi do
   end
   @spec authenticate_user(String.t, String.t, atom) :: {atom, String.t} | {atom, atom, String.t} | {atom, atom}
   def authenticate_user(name, password, authentication_source \\ :browser) do
-    Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
+    UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
       GenServer.cast(UserManager.Authenticate.AuthenticateUserWorkflowProducer, {:authenticate_user, name, password, authentication_source, self()})
       receive do
         some_msg -> some_msg
@@ -30,7 +32,7 @@ defmodule UserManager.UserManagerApi do
   end
   @spec identify_user(String.t) :: {atom, UserManager.User.t} | {atom, atom} | {atom, atom, String.t}
   def identify_user(token) do
-    Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
+    UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
       GenServer.cast(UserManager.Identify.IdentifyUserProducer, {:identify_user, token, self()})
       receive do
         some_msg -> some_msg
@@ -39,7 +41,7 @@ defmodule UserManager.UserManagerApi do
   end
   @spec authorize_claims(String.t, Enum.t, bool) :: {atom} | {atom, atom} | {atom, atom, String.t}
   def authorize_claims(token, permission_list, require_all \\ true) do
-    Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
+    UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
       GenServer.cast(UserManager.Authorize.AuthorizeUserWorkflowProducer, {:authorize_token, token, permission_list, require_all, self()})
       receive do
         some_msg -> some_msg

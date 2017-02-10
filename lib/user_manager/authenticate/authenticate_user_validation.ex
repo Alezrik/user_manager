@@ -13,27 +13,20 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
     {:producer_consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserUserLookup]}
   end
   def handle_events(events, from, state) do
-    process_events = events
-    |> Enum.filter(fn e -> case e do
-        {:validate_user, user, password, source, notify} -> true
-        other -> false
-      end
-    end)
+    process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_user)
     |> Flow.from_enumerable
     |> Flow.map(fn {:validate_user, user, password, source, notify} ->
-        case Bcrypt.checkpw(password, user.user_profile.password) do
-          true -> {:authenticate_user, user, source, notify}
-          false -> {:authenticate_failure, notify}
-        end
+      authenticate_user(password, user.user_profile.password, user, source, notify)
      end)
      |> Enum.to_list
-
-     un_processed_events = events
-     |> Enum.filter(fn e -> case e do
-          {:validate_user, user, password, source, notify} -> false
-          other -> true
-        end
-      end)
+     un_processed_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :validate_user)
       {:noreply, process_events ++ un_processed_events, state}
   end
+  defp authenticate_user(input_password, encrypted_password, user, source, notify) do
+    case Bcrypt.checkpw(input_password, encrypted_password) do
+      true -> {:authenticate_user, user, source, notify}
+      false -> {:authenticate_failure, notify}
+    end
+  end
+
 end

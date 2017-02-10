@@ -22,11 +22,7 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
         |> Flow.map(fn {:authenticate_user, user, source, notify} ->
           u = user |> Repo.preload(:permissions)
           permissions = group_permissions(u.permissions)
-          case Guardian.encode_and_sign(user, source, %{"perms" => permissions}) do
-            {:ok, jtw, data} -> {:ok, notify, jtw}
-            {:error, :token_storage_failure} -> {:token_storage_failure, notify}
-            {:error, reason} -> {:token_error, notify, reason}
-          end
+          generate_token(user, source, permissions, notify)
          end)
         |> Enum.to_list
         un_process_events = events
@@ -43,5 +39,12 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
         permission = x |> Repo.preload(:permission_group)
         String.to_atom(permission.permission_group.name)
         end, fn x -> String.to_atom(x.name) end)
+    end
+    defp generate_token(user, source, permissions, notify) do
+      case Guardian.encode_and_sign(user, source, %{"perms" => permissions}) do
+        {:ok, jtw, data} -> {:ok, notify, jtw}
+        {:error, :token_storage_failure} -> {:token_storage_failure, notify}
+        {:error, reason} -> {:token_error, notify, reason}
+      end
     end
 end

@@ -36,6 +36,14 @@ UserManager.UserManagerApi.identify_user(token)
 
 UserManager.UserManagerApi.authorize_claims(token, permission_list, require_all \\ true) 
 
+## Scope
+
+goals:
+* Agnostic user management for 'any' system needing user management. (phoenix, games)
+* Management of user authentication, authorization.
+* Management of application user metadata.
+* Integration of 3rd party authenticatio providers
+
 ## Documentation
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
