@@ -1,6 +1,7 @@
 # UserManager
 
 [![Build Status](https://travis-ci.org/Alezrik/user_manager.svg?branch=master)](https://travis-ci.org/Alezrik/user_manager)
+[![Coverage Status](https://coveralls.io/repos/github/Alezrik/user_manager/badge.svg?branch=master)](https://coveralls.io/github/Alezrik/user_manager?branch=master)
 
 **A module for managing Users with Authentication and Authorization**
 
