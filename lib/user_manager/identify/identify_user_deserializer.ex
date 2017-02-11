@@ -10,8 +10,23 @@ defmodule UserManager.Identify.IdentifyUserDeserializer do
       def init(stat) do
         {:producer_consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserValidateToken]}
       end
-      def handle_events(events, from, state) do
+      @doc"""
+      get user from the decoded token
 
+      ## Examples
+        iex>{:ok, usr} = UserManager.UserManagerApi.create_user(Faker.Name.first_name <> Faker.Name.last_name, "testpassword", Faker.Internet.email)
+        iex>usr_id = "User:" <> Integer.to_string(usr.id)
+        iex>{:noreply, response, _} = UserManager.Identify.IdentifyUserDeserializer.handle_events( [{:deserialize_user, %{"sub"=>usr_id}, nil}], nil, [])
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+        :ok
+
+        iex>{:noreply, response, _} = UserManager.Identify.IdentifyUserDeserializer.handle_events( [{:deserialize_user, %{"sub"=>"fdsafdsa"}, nil}], nil, [])
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+        :error
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 1)
+        :user_deserialize_error
+"""
+      def handle_events(events, from, state) do
         process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:deserialize_user)
         |> Flow.from_enumerable
         |> Flow.map(fn {:deserialize_user, data, notify} ->
