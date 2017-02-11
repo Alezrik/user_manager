@@ -11,11 +11,11 @@ This module is a collection of GenStage work-flows for managing Users and User A
 
 ## Installation
 
-This is currently not deployed in hex
+https://hex.pm/packages/user_manager/0.1.0
 
 ```elixir
 def deps do
-  [{:user_manager, git: "https://github.com/Alezrik/user_manager.git"}]
+  [{:user_manager, "~> 0.1.0"}]
 end
 ```
 
@@ -43,13 +43,11 @@ goals:
 * Agnostic user management for 'any' system needing user management. (phoenix, games)
 * Management of user authentication, authorization.
 * Management of application user metadata.
-* Integration of 3rd party authenticatio providers
+* Integration of 3rd party authentication providers
 
 ## Documentation
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/user_manager](https://hexdocs.pm/user_manager).
+https://hexdocs.pm/user_manager/0.1.0
 
 ## Blog
 https://excavationofimagination.wordpress.com/
