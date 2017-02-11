@@ -50,7 +50,7 @@ defmodule UserManager.Authorize.AuthorizeUserValidatePermissions do
           process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_permissions)
           |> Flow.from_enumerable
           |> Flow.map(fn {:validate_permissions, data, permission_list, require_all, notify} ->
-            permission_results = Enum.reduce_while(permission_list, false, fn {group, per_name}, acc ->
+            permission_results = Enum.reduce_while(permission_list, {false}, fn {group, per_name}, acc ->
               r = data
               |> Guardian.Permissions.from_claims(group)
               |> Guardian.Permissions.all?([per_name], group)
@@ -59,7 +59,6 @@ defmodule UserManager.Authorize.AuthorizeUserValidatePermissions do
              case permission_results do
                {true} -> {:ok, notify}
                {false} -> {:error, :unauthorized, notify}
-               false -> {:error, :unauthorized, notify}
              end
           end)
           |> Enum.to_list
