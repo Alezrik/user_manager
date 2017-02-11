@@ -12,8 +12,44 @@ defmodule UserManager.Identify.IdentifyUserNotificationFormatter do
 
         {:producer_consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserDeserializer]}
       end
-      def handle_events(events, from, state) do
+      @doc"""
+      format for notification
 
+      ## Example
+         iex>UserManager.Identify.IdentifyUserNotificationFormatter.handle_events([{:ok, "", nil}], nil, [])
+         {:noreply, [], []}
+
+         iex>UserManager.Identify.IdentifyUserNotificationFormatter.handle_events([{:error, :token_not_found, nil}], nil, [])
+         {:noreply, [], []}
+
+         iex>UserManager.Identify.IdentifyUserNotificationFormatter.handle_events([{:error, :token_decode_error, "something", nil}], nil, [])
+         {:noreply, [], []}
+
+         iex>{:noreply, response, _} = UserManager.Identify.IdentifyUserNotificationFormatter.handle_events([{:ok, "pretend_ima_user", self}], nil, [])
+         iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+         :notify_success
+         iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 1)
+         :identify_user
+
+        iex>{:noreply, response, _} = UserManager.Identify.IdentifyUserNotificationFormatter.handle_events([{:error, :token_not_found, self}], nil, [])
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+        :notify_error
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 1)
+        :token_not_found
+
+        iex>{:noreply, response, _} = UserManager.Identify.IdentifyUserNotificationFormatter.handle_events([{:error, :token_decode_error, "something", self}], nil, [])
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+        :notify_error
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 1)
+        :token_decode_error
+
+        iex>{:noreply, response, _} = UserManager.Identify.IdentifyUserNotificationFormatter.handle_events([{:error, :user_deserialize_error, self}], nil, [])
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+        :notify_error
+        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 1)
+        :user_deserialize_error
+"""
+      def handle_events(events, from, state) do
         format_events = events
         |> Flow.from_enumerable
         |> Flow.flat_map(fn e ->
