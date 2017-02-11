@@ -10,9 +10,8 @@ defmodule RepoTest do
       permission_group = PermissionGroup.changeset(%PermissionGroup{}, %{"name" => "test_group1"})
       assert permission_group.valid?
       {:ok, permission_group_serialized} = Repo.insert(permission_group)
-      permission_group_serialized = permission_group_serialized |> Repo.preload(:permissions)
-      permission = Permission.changeset(%Permission{}, %{"name" => "test_permission1"})
-      |> put_assoc(:permission_group, permission_group_serialized)
+      permission_group_serialized =  Repo.preload(permission_group_serialized, :permissions)
+      permission = put_assoc(Permission.changeset(%Permission{}, %{"name" => "test_permission1"}), :permission_group, permission_group_serialized)
       assert permission.valid?
       {:ok, permission_serialized} = Repo.insert(permission)
       user_profile = UserProfile.changeset(%UserProfile{}, %{"name" => Faker.Name.first_name, "password" => <<"somelegalpassword">>, "email" => Faker.Internet.email})

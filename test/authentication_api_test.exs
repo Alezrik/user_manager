@@ -15,7 +15,7 @@ defmodule AuthenticationApiTest do
       {:ok, user} = UserManager.UserManagerApi.identify_user(token)
       assert user != nil
       assert user.id > 0
-      user = user |> Repo.preload(:user_profile)
+      user =  Repo.preload(user, :user_profile)
       assert user.user_profile.name == "testuser1"
       assert Comeonin.Bcrypt.checkpw("testpassword1", user.user_profile.password)
     end
