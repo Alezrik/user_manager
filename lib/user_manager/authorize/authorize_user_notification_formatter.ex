@@ -47,9 +47,6 @@ defmodule UserManager.Authorize.AuthorizeUserNotificationFormatter do
       :notify_error
       iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 1)
       :unauthorized
-
-
-
 """
     def handle_events(events, from, state) do
       format_events = events

@@ -25,7 +25,6 @@ defmodule UserManager.Authorize.AuthorizeUserValidatePermissions do
           iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
           :ok
 
-
           iex>name = Faker.Name.first_name <> Faker.Name.last_name
           iex>email = Faker.Internet.email
           iex>{:ok, _user} = UserManager.UserManagerApi.create_user(name, "secretpassword", email)
