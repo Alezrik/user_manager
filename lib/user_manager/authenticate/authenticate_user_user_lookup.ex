@@ -12,6 +12,20 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
   def init(state) do
     {:producer_consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserWorkflowProducer]}
   end
+  @doc"""
+  get event from workflow producer
+
+  Input: {:authenticate_user, name, password, source, notify}
+
+  Output:
+    {:user_not_found_error, notify}
+    {:validate_user, user, password, source, notify}
+
+  ## Examples:
+
+    iex> UserManager.Authenticate.AuthenticateUserUserLookup.handle_events([{:authenticate_user, "fdsafdsa", "fdsafdsa", :browser, nil}], self(), [])
+    {:noreply, [user_not_found_error: nil], []}
+"""
   def handle_events(events, from, state) do
     process_events = events
     |> Flow.from_enumerable

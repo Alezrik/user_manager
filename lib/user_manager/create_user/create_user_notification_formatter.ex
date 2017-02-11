@@ -34,20 +34,17 @@ defmodule UserManager.CreateUser.CreateUserNotificationFormatter do
       iex>Enum.at(Tuple.to_list(Enum.at(response,0)),0)
       :notify_success
 
-
       iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:validation_error, "", self()}], self(), [])
       iex>Enum.at(Tuple.to_list(Enum.at(response,0)) ,0)
       :notify_error
       iex>Enum.at(Tuple.to_list(Enum.at(response,0)) ,1)
       :create_user_validation_error
 
-
       iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:update_permission_error, self(), ["errors"]}], self(), [])
       iex>Enum.at(Tuple.to_list(Enum.at(response,0)) ,0)
       :notify_error
       iex>Enum.at(Tuple.to_list(Enum.at(response,0)) ,1)
       :update_permission_error
-
 
       iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:insert_error, ["errors"], self()}], self(), [])
       iex>Enum.at(Tuple.to_list(Enum.at(response,0)) ,0)
