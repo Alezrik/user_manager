@@ -8,10 +8,9 @@ defmodule UserManager.WorkflowProcessing do
     get_events(events, processed_tag, false)
   end
   def get_events(events, process_tag, match) do
-    events
-    |> Enum.filter(fn e ->
+
+    Enum.filter(events, fn e ->
       (Enum.fetch!(Tuple.to_list(e), 0) == process_tag) == match
-     end)
+    end)
   end
-  
 end

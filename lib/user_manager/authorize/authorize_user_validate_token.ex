@@ -22,5 +22,4 @@ defmodule UserManager.Authorize.AuthorizeUserValidateToken do
      |> Enum.to_list
      {:noreply, process_events, state}
    end
-  
 end

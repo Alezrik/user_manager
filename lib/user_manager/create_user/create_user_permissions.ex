@@ -19,8 +19,7 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
     |> where(name: ^Atom.to_string(group))
     |> Repo.one!
     |> Repo.preload(:permissions)
-    per_list
-    |> Enum.flat_map(fn l ->
+    Enum.flat_map(per_list, fn l ->
       Enum.filter(g.permissions, fn p -> p.name == Atom.to_string(l) end)
      end)
   end
@@ -32,7 +31,7 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
      |> Flow.map(fn e ->
         {:insert_permissions, user, notify} = e
         event_permissions_inserts = Stream.map(create_permissions_state, fn p ->
-          permission = p |> Repo.preload(:users)
+          permission = Repo.preload(p, :users)
           user_list = [user | permission.users]
            changeset = permission |> Permission.changeset(%{}) |> put_assoc(:users, user_list)
            update_repo(changeset)

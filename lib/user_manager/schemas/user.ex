@@ -17,7 +17,6 @@ defmodule UserManager.Schemas.User do
     timestamps()
   end
   def changeset(user, params \\ %{}) do
-    user
-    |> cast(params, [])
+    cast(user, params, [])
   end
 end

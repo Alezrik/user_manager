@@ -22,8 +22,8 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
         |> Repo.one do
           nil -> {:user_not_found_error, notify}
           user_profile ->
-          profile = user_profile |> Repo.preload(:user)
-           u = profile.user |> Repo.preload(:user_profile)
+          profile =  Repo.preload(user_profile, :user)
+           u =  Repo.preload(profile.user, :user_profile)
           {:validate_user, u, password, source, notify}
         end
      end)

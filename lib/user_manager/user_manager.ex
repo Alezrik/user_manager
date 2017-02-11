@@ -13,5 +13,4 @@ defmodule UserManager do
     * `UserManager.UserManagerApi.authorize_claims/3` is used to verify if a user/token has a certain permission
 
 """
-  
 end

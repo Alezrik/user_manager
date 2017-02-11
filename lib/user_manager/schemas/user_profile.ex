@@ -16,7 +16,6 @@ defmodule UserManager.Schemas.UserProfile do
       iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"name"=>"", "password"=>"fdsafdsafdsa", "email"=>"fdsafdsa@fdsafdsa.com"}).valid?
       false
 """
-
   use Ecto.Schema
   import Ecto.Changeset
   alias Comeonin.Bcrypt
@@ -32,7 +31,7 @@ defmodule UserManager.Schemas.UserProfile do
       true -> ""
       false -> Bcrypt.hashpwsalt(Map.fetch!(params, "password"))
     end
-    encrypted_params = params |> Map.put("password", encrypted_password)
+    encrypted_params =  Map.put(params, "password", encrypted_password)
     user_profile
     |> cast(encrypted_params, [:name, :password, :email])
     |> validate_required([:name, :password, :email])

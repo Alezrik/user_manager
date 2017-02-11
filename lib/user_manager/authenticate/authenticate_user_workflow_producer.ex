@@ -37,5 +37,4 @@ defmodule UserManager.Authenticate.AuthenticateUserWorkflowProducer do
       {send_events, queued_events} = Enum.split(Enum.reverse([new_event | items_queue]), demand)
       {send_events, {queued_events, demand - Enum.count(send_events)}}
     end
-  
 end

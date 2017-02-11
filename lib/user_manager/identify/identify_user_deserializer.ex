@@ -24,5 +24,4 @@ defmodule UserManager.Identify.IdentifyUserDeserializer do
         un_processed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :deserialize_user)
         {:noreply, process_events ++ un_processed_events, state}
       end
-  
 end

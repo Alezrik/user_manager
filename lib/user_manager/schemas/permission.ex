@@ -9,8 +9,6 @@ defmodule UserManager.Schemas.Permission do
 
       iex>UserManager.Schemas.Permission.changeset(%UserManager.Schemas.Permission{}, %{}).valid?
       false
-
-
 """
   use Ecto.Schema
   import Ecto.Changeset

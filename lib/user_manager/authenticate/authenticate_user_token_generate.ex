@@ -26,7 +26,7 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
     @spec group_permissions(List.t) :: Map.t
     defp group_permissions(user_permission_list) do
       Enum.group_by(user_permission_list, fn x ->
-        permission = x |> Repo.preload(:permission_group)
+        permission = Repo.preload(x, :permission_group)
         String.to_atom(permission.permission_group.name)
         end, fn x -> String.to_atom(x.name) end)
     end
