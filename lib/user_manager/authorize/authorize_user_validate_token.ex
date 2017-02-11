@@ -23,7 +23,6 @@ defmodule UserManager.Authorize.AuthorizeUserValidateToken do
       iex>Enum.at(Tuple.to_list(Enum.at(response, 0)),0)
       :validate_permissions
 
-
       iex>msg = {:authorize_token, "fskafsakjfkasfd", [], true, nil}
       iex>{:noreply, response, state} = UserManager.Authorize.AuthorizeUserValidateToken.handle_events([msg], nil, [])
       iex>Enum.at(Tuple.to_list(Enum.at(response, 0)),0)
