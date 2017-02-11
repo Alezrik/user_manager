@@ -12,6 +12,29 @@ defmodule UserManager.CreateUser.CreateUserDataValidator do
   def init(stat) do
     {:producer_consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserWorkflowProducer]}
   end
+  @doc"""
+
+  responsible for validating input to create a user
+
+  Examples:
+
+    iex>{:noreply, response, _} = UserManager.CreateUser.CreateUserDataValidator.handle_events([{:create_user, "validusername", "validpassword", "email@here.com", nil}], nil, [])
+    iex> assert Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+    :insert_user
+
+    iex>{:noreply, response, _} = UserManager.CreateUser.CreateUserDataValidator.handle_events([{:create_user, "", "validpassword", "email@here.com", nil}], nil, [])
+    iex> assert Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+    :validation_error
+
+    iex>{:noreply, response, _} = UserManager.CreateUser.CreateUserDataValidator.handle_events([{:create_user, "validusername", "", "email@here.com", nil}], nil, [])
+    iex> assert Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+    :validation_error
+
+    iex>{:noreply, response, _} = UserManager.CreateUser.CreateUserDataValidator.handle_events([{:create_user, "validusername", "validpassword", "", nil}], nil, [])
+    iex> assert Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+    :validation_error
+
+"""
   def handle_events(events, from, state) do
     process_events = events
     |> Flow.from_enumerable

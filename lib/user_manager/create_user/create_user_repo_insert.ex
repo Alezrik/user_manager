@@ -11,6 +11,16 @@ defmodule UserManager.CreateUser.CreateUserRepoInsert do
 
     {:producer_consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserDataValidator]}
   end
+  @doc"""
+  responsible for saving changelist(s) for user data
+
+  ## Examples
+
+     iex>userchangeset =UserManager.Schemas.User.changeset( %UserManager.Schemas.User{}, %{})
+     iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserRepoInsert.handle_events([{:insert_user, userchangeset, nil}], self(), [])
+     iex>Enum.at(Tuple.to_list(Enum.at(response,0)),0)
+     :insert_permissions
+"""
   def handle_events(events, from, state) do
     process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:insert_user)
     |> Flow.from_enumerable
