@@ -12,6 +12,25 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
   def init(state) do
     {:producer_consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserUserLookup]}
   end
+  @doc"""
+  validates user input vs encrypted db field
+
+  iex>name = Faker.Name.first_name <> Faker.Name.last_name
+  iex>email = Faker.Internet.email
+  iex>{:ok, user} = UserManager.UserManagerApi.create_user(name, "secretpassword", email)
+  iex>{:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserValidation.handle_events([{:validate_user, user, "secretpassword", :browser, nil}], nil, [])
+  iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+  :authenticate_user
+
+  iex>name = Faker.Name.first_name <> Faker.Name.last_name
+  iex>email = Faker.Internet.email
+  iex>{:ok, user} = UserManager.UserManagerApi.create_user(name, "secretpassword", email)
+  iex>{:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserValidation.handle_events([{:validate_user, user, "secretpassworda", :browser, nil}], nil, [])
+  iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+  :authenticate_failure
+
+
+"""
   def handle_events(events, from, state) do
     process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_user)
     |> Flow.from_enumerable

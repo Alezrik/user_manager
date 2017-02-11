@@ -22,9 +22,15 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
     {:validate_user, user, password, source, notify}
 
   ## Examples:
+    iex> name = Faker.Name.first_name <> Faker.Name.last_name
+    iex> {:ok, _user} = UserManager.UserManagerApi.create_user(name, "secretpassword", "here@there.com")
+    iex> {:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserUserLookup.handle_events([{:authenticate_user, name, "secretpassword", :browser, nil}], self(), [])
+    iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+    :validate_user
 
-    iex> UserManager.Authenticate.AuthenticateUserUserLookup.handle_events([{:authenticate_user, "fdsafdsa", "fdsafdsa", :browser, nil}], self(), [])
-    {:noreply, [user_not_found_error: nil], []}
+    iex> {:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserUserLookup.handle_events([{:authenticate_user, "someothername", "secretpassword", :browser, nil}], self(), [])
+    iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+    :user_not_found_error
 """
   def handle_events(events, from, state) do
     process_events = events

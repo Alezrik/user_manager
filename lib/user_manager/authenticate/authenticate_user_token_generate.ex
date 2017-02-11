@@ -11,6 +11,17 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
     def init(state) do
       {:producer_consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserValidation]}
     end
+    @doc"""
+    generates user tokens
+
+    ## Examples
+      iex>name = Faker.Name.first_name <> Faker.Name.last_name
+      iex>email = Faker.Internet.email
+      iex>{:ok, user} = UserManager.UserManagerApi.create_user(name, "secretpassword", email)
+      iex>{:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserTokenGenerate.handle_events([{:authenticate_user, user, :browser, nil}], nil, [])
+      iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
+      :ok
+"""
     def handle_events(events, from, state) do
         process_events = events |> UserManager.WorkflowProcessing.get_process_events(:authenticate_user)
         |> Flow.from_enumerable

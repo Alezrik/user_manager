@@ -16,7 +16,7 @@ defmodule UserManager.CreateUser.CreateUserNotificationFormatter do
 
     ## Examples
 
-    strip messages without notify endpoints
+    ### strip messages without notify endpoints
 
       iex>UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:ok, nil, %UserManager.Schemas.User{}}], nil, [])
       {:noreply, [], []}
@@ -29,6 +29,8 @@ defmodule UserManager.CreateUser.CreateUserNotificationFormatter do
 
       iex>UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:validation_error, "", nil}], nil, [])
       {:noreply, [], []}
+
+    ### generate notifications for items with notify
 
       iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:ok, self(), %UserManager.Schemas.User{}}], self(), [])
       iex>Enum.at(Tuple.to_list(Enum.at(response,0)),0)
