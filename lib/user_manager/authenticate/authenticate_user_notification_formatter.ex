@@ -30,7 +30,6 @@ defmodule UserManager.Authenticate.AuthenticateUserNotificationFormatter do
     iex>UserManager.Authenticate.AuthenticateUserNotificationFormatter.handle_events([{:token_error, nil, "reasons"}], nil, [])
     {:noreply, [], []}
 
-
     iex>{:noreply, response, state} = UserManager.Authenticate.AuthenticateUserNotificationFormatter.handle_events([{:ok, self(), "someawesometoken"}], nil, [])
     iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
     :notify_success

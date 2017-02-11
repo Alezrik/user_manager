@@ -28,8 +28,6 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
   iex>{:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserValidation.handle_events([{:validate_user, user, "secretpassworda", :browser, nil}], nil, [])
   iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
   :authenticate_failure
-
-
 """
   def handle_events(events, from, state) do
     process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_user)
