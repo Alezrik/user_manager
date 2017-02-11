@@ -9,7 +9,7 @@ defmodule UserManager.CreateUser.CreateUserNotification do
     {:consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserNotificationFormatter]}
   end
   def handle_events(events, from, state) do
-    events
+    processed_events = events
     |> Flow.from_enumerable()
     |> Flow.each(fn e ->
         case e do

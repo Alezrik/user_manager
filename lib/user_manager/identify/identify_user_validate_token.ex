@@ -25,4 +25,3 @@ defmodule UserManager.Identify.IdentifyUserValidateToken do
        {:noreply, process_events, state}
      end
 end
-  

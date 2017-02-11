@@ -12,25 +12,15 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
       {:producer_consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserValidation]}
     end
     def handle_events(events, from, state) do
-        process_events = events
-        |> Enum.filter(fn e -> case e do
-            {:authenticate_user, user, source, notify} -> true
-            other -> false
-          end
-        end)
+        process_events = events |> UserManager.WorkflowProcessing.get_process_events(:authenticate_user)
         |> Flow.from_enumerable
         |> Flow.map(fn {:authenticate_user, user, source, notify} ->
-          u = user |> Repo.preload(:permissions)
+          u = Repo.preload(user, :permissions)
           permissions = group_permissions(u.permissions)
           generate_token(user, source, permissions, notify)
          end)
         |> Enum.to_list
-        un_process_events = events
-        |> Enum.filter(fn e -> case e do
-            {:authenticate_user, user, source, notify} -> false
-            other -> true
-          end
-        end)
+        un_process_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :authenticate_user)
         {:noreply, process_events ++ un_process_events, state}
     end
     @spec group_permissions(List.t) :: Map.t
