@@ -11,5 +11,4 @@ config :user_manager, UserManager.Repo,
   port: "5432"
 
 config :user_manager,
-  new_user_default_permissions: %{default: [:read]},
   syncronous_api_timeout: 1000

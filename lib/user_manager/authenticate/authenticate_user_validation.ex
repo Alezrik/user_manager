@@ -4,6 +4,7 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
   require Logger
   alias UserManager.Schemas.User
   alias UserManager.Repo
+  alias UserManager.Schemas.Permission
   import Ecto.Query
   alias Comeonin.Bcrypt
   def start_link(setup) do
@@ -32,6 +33,7 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
   def handle_events(events, from, state) do
     process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_user)
     |> Flow.from_enumerable
+    |> Flow.map(fn e -> validate_login_permission(e) end)
     |> Flow.map(fn e -> process_event(e) end)
     |> Enum.to_list
     un_processed_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :validate_user)
@@ -42,6 +44,24 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
     case Bcrypt.checkpw(password, encrypted_password) do
       true -> {:authenticate_user, user, source, notify}
       false -> {:authenticate_failure, notify}
+    end
+  end
+  defp process_event({:authorization_failure, notify}) do
+    {:authorization_failure, notify}
+  end
+  defp validate_login_permission({:validate_user, user, password, source, notify}) do
+    [permission_id] = GenServer.call(UserManager.PermissionRepo, {:get_permission_id_by_group_name_permission_name, :authenticate, :credential})
+    p = Permission
+    |> where(id: ^permission_id)
+    |> Repo.all
+    |> Enum.map(fn p ->
+      Repo.preload(p, :users) end)
+    |> Enum.flat_map(fn p ->
+      Enum.map(p.users, fn u -> u.id end) end)
+    |> Enum.member?(user.id)
+    case p do
+      false -> {:authorization_failure, notify}
+      true -> {:validate_user, user, password, source, notify}
     end
   end
 

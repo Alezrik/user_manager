@@ -27,4 +27,7 @@ defmodule UserManager.Authenticate.AuthenticateUserNotification do
     def process_notification({:notify_error, :authenticate_failure, notify}) do
       :ok = Process.send(notify, {:error, :authenticate_failure}, [])
     end
+    def process_notification({:notify_error, :authorization_failure, notify}) do
+      :ok = Process.send(notify, {:error, :authorization_failure}, [])
+    end
 end

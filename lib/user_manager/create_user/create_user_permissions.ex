@@ -42,6 +42,7 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
   end
   defp process_insert_permissions({:insert_permissions, user, notify}) do
     create_permissions = GenServer.call(UserManager.PermissionRepo, {:get_default_user_create_permission_ids})
+    Logger.debug "create permission ids: #{inspect create_permissions}"
     event_permissions_inserts = Stream.map(create_permissions, fn p_id ->
       permission = Permission
       |> where(id: ^p_id)

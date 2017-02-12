@@ -10,7 +10,7 @@ use Mix.Config
 config :user_manager, ecto_repos: [UserManager.Repo]
 
 config :user_manager,
-  new_user_default_permissions: %{default: [:read]},
+  new_user_default_permissions: %{default: [:read], authenticate: [:credential]},
   syncronous_api_timeout: 60_000
 config :guardian, Guardian,
   allowed_algos: ["HS512"], # optional
@@ -24,6 +24,7 @@ config :guardian, Guardian,
   hooks: GuardianDb,
   permissions: %{
     default: [:read],
+    authenticate: [:credential],
     admin: [:read, :create, :update, :delete]
   }
 

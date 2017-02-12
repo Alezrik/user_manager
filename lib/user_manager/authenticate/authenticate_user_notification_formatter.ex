@@ -79,6 +79,12 @@ defmodule UserManager.Authenticate.AuthenticateUserNotificationFormatter do
   defp get_notifications({:token_storage_failure, nil}) do
     []
   end
+  defp get_notifications({:authorization_failure, nil}) do
+    []
+  end
+  defp get_notifications({:authorization_failure, notify}) do
+    [{:notify_error, :authorization_failure, notify}]
+  end
   defp get_notifications({:token_error, nil, _}) do
     []
   end
