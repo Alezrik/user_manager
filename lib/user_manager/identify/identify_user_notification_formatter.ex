@@ -52,19 +52,32 @@ defmodule UserManager.Identify.IdentifyUserNotificationFormatter do
       def handle_events(events, from, state) do
         format_events = events
         |> Flow.from_enumerable
-        |> Flow.flat_map(fn e ->
-          case e do
-            {:ok, user, nil} -> []
-            {:error, :user_deserialize_error, nil} -> []
-            {:error, :token_not_found, nil} -> []
-             {:error, :token_decode_error, reason, nil} -> []
-            {:ok, user, notify} -> [{:notify_success, :identify_user, notify, user}]
-            {:error, :user_deserialize_error, notify} -> [{:notify_error, :user_deserialize_error, notify}]
-            {:error, :token_not_found, notify} -> [{:notify_error, :token_not_found, notify}]
-            {:error, :token_decode_error, reason, notify} -> [{:notify_error, :token_decode_error, notify, reason}]
-          end
-        end)
+        |> Flow.flat_map(fn e -> get_notifications(e) end)
         |> Enum.to_list
         {:noreply, format_events, state}
+      end
+      defp get_notifications({:ok, _, nil}) do
+        []
+      end
+      defp get_notifications({:error, :user_deserialize_error, nil}) do
+        []
+      end
+      defp get_notifications({:error, :token_not_found, nil}) do
+        []
+      end
+      defp get_notifications({:error, :token_decode_error, _, nil}) do
+        []
+      end
+      defp get_notifications({:ok, user, notify}) do
+        [{:notify_success, :identify_user, notify, user}]
+      end
+      defp get_notifications({:error, :user_deserialize_error, notify}) do
+        [{:notify_error, :user_deserialize_error, notify}]
+      end
+      defp get_notifications({:error, :token_not_found, notify}) do
+        [{:notify_error, :token_not_found, notify}]
+      end
+      defp get_notifications({:error, :token_decode_error, reason, notify}) do
+        [{:notify_error, :token_decode_error, notify, reason}]
       end
 end

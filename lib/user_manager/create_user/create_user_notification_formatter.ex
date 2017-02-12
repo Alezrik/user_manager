@@ -61,19 +61,33 @@ defmodule UserManager.CreateUser.CreateUserNotificationFormatter do
     def handle_events(events, from, state) do
       format_events = events
       |> Flow.from_enumerable
-      |> Flow.flat_map(fn e ->
-          case e do
-             {:ok, nil, user} -> [{:create_user_notify, user.id}]
-             {:update_permission_error, nil, _} -> []
-             {:validation_error, _, nil} -> []
-             {:insert_error, _, nil} -> []
-             {:ok, notify, user} -> [{:notify_success, :create_user, notify, user}, {:create_user_notify, user.id}]
-             {:update_permission_error, notify, errors} -> [{:notify_error, :update_permission_error, notify, errors}]
-             {:validation_error, errors, notify} -> [{:notify_error, :create_user_validation_error, notify, errors}]
-             {:insert_error, errors, notify} -> [{:notify_error, :create_user_insert_error, notify, errors}]
-          end
-       end)
+      |> Flow.flat_map(fn e -> get_notifications(e) end)
       |> Enum.to_list
       {:noreply, format_events, state}
+    end
+
+    defp get_notifications({:ok, nil, user}) do
+      [{:create_user_notify, user.id}]
+    end
+    defp get_notifications({:update_permission_error, nil, _}) do
+      []
+    end
+    defp get_notifications({:validation_error, _, nil}) do
+      []
+    end
+    defp get_notifications({:insert_error, _, nil}) do
+      []
+    end
+    defp get_notifications({:ok, notify, user}) do
+      [{:notify_success, :create_user, notify, user}, {:create_user_notify, user.id}]
+    end
+    defp get_notifications({:update_permission_error, notify, errors}) do
+      [{:notify_error, :update_permission_error, notify, errors}]
+    end
+    defp get_notifications({:validation_error, errors, notify}) do
+      [{:notify_error, :create_user_validation_error, notify, errors}]
+    end
+    defp get_notifications({:insert_error, errors, notify}) do
+      [{:notify_error, :create_user_insert_error, notify, errors}]
     end
 end

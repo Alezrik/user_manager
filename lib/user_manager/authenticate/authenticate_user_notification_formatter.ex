@@ -63,22 +63,38 @@ defmodule UserManager.Authenticate.AuthenticateUserNotificationFormatter do
   def handle_events(events, from, state) do
     format_events = events
     |> Flow.from_enumerable
-    |> Flow.flat_map(fn e ->
-        case e do
-          {:ok, nil, _} -> []
-          {:user_not_found_error, nil} -> []
-          {:authenticate_failure, nil} -> []
-          {:token_storage_failure, nil} -> []
-          {:token_error, nil, _} -> []
-          {:ok, notify, token} -> [{:notify_success, :authentication, notify, token}]
-          {:user_not_found_error, notify} -> [{:notify_error, :user_not_found, notify}]
-          {:authenticate_failure, notify} -> [{:notify_error, :authenticate_failure, notify}]
-          {:token_storage_failure, notify} -> [{:notify_error, :token_storage_failure, notify}]
-          {:token_error, notify, reason} -> [{:notify_error, :authenticate_token_error, notify, reason}]
-        end
-
-     end)
+    |> Flow.flat_map(fn x -> get_notifications(x) end)
     |> Enum.to_list
     {:noreply, format_events, state}
+  end
+  defp get_notifications({:ok, nil, _}) do
+    []
+  end
+  defp get_notifications({:user_not_found_error, nil}) do
+    []
+  end
+  defp get_notifications({:authenticate_failure, nil}) do
+    []
+  end
+  defp get_notifications({:token_storage_failure, nil}) do
+    []
+  end
+  defp get_notifications({:token_error, nil, _}) do
+    []
+  end
+  defp get_notifications({:ok, notify, token}) do
+    [{:notify_success, :authentication, notify, token}]
+  end
+  defp get_notifications({:user_not_found_error, notify}) do
+    [{:notify_error, :user_not_found, notify}]
+  end
+  defp get_notifications({:authenticate_failure, notify}) do
+    [{:notify_error, :authenticate_failure, notify}]
+  end
+  defp get_notifications({:token_storage_failure, notify}) do
+    [{:notify_error, :token_storage_failure, notify}]
+  end
+  defp get_notifications({:token_error, notify, reason}) do
+    [{:notify_error, :authenticate_token_error, notify, reason}]
   end
 end
