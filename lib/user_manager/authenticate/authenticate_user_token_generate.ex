@@ -25,11 +25,7 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
     def handle_events(events, from, state) do
         process_events = events |> UserManager.WorkflowProcessing.get_process_events(:authenticate_user)
         |> Flow.from_enumerable
-        |> Flow.map(fn {:authenticate_user, user, source, notify} ->
-          u = Repo.preload(user, :permissions)
-          permissions = group_permissions(u.permissions)
-          generate_token(user, source, permissions, notify)
-         end)
+        |> Flow.map(fn e -> process_event(e) end)
         |> Enum.to_list
         un_process_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :authenticate_user)
         {:noreply, process_events ++ un_process_events, state}
@@ -41,8 +37,10 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
         String.to_atom(permission.permission_group.name)
         end, fn x -> String.to_atom(x.name) end)
     end
-    defp generate_token(user, source, permissions, notify) do
-      case Guardian.encode_and_sign(user, source, %{"perms" => permissions}) do
+    defp process_event({:authenticate_user, user, source, notify}) do
+      u = Repo.preload(user, :permissions)
+      permissions = group_permissions(u.permissions)
+      case Guardian.encode_and_sign(u, source, %{"perms" => permissions}) do
         {:ok, jtw, data} -> {:ok, notify, jtw}
         {:error, :token_storage_failure} -> {:token_storage_failure, notify}
         {:error, reason} -> {:token_error, notify, reason}

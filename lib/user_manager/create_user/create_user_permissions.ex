@@ -31,27 +31,27 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
   def handle_events(events, from, state) do
     process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:insert_permissions)
      |> Flow.from_enumerable
-     |> Flow.map(fn e ->
-        {:insert_permissions, user, notify} = e
-        create_permissions = GenServer.call(UserManager.PermissionRepo, {:get_default_user_create_permission_ids})
-        event_permissions_inserts = Stream.map(create_permissions, fn p_id ->
-          permission = Permission
-          |> where(id: ^p_id)
-          |> Repo.one!
-          |> Repo.preload(:users)
-          user_list = [user | permission.users]
-          changeset = permission |> Permission.changeset(%{}) |> put_assoc(:users, user_list)
-          update_repo(changeset)
-         end)
-         {e, event_permissions_inserts}
-      end)
-      |> Flow.map(fn e ->
-        {{:insert_permissions, user, notify}, event_permissions_inserts} = e
-        compile_update_result(event_permissions_inserts, user, notify)
-       end)
-      |> Enum.to_list
-      unprocessed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :insert_permissions)
-    {:noreply, process_events ++ unprocessed_events, state}
+     |> Flow.map(fn e -> process_insert_permissions(e) end)
+     |> Flow.map(fn e -> process_insert_results(e) end)
+     |> Enum.to_list
+     unprocessed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :insert_permissions)
+     {:noreply, process_events ++ unprocessed_events, state}
+  end
+  defp process_insert_results({{:insert_permissions, user, notify}, event_permissions_inserts}) do
+    compile_update_result(event_permissions_inserts, user, notify)
+  end
+  defp process_insert_permissions({:insert_permissions, user, notify}) do
+    create_permissions = GenServer.call(UserManager.PermissionRepo, {:get_default_user_create_permission_ids})
+    event_permissions_inserts = Stream.map(create_permissions, fn p_id ->
+      permission = Permission
+      |> where(id: ^p_id)
+      |> Repo.one!
+      |> Repo.preload(:users)
+      user_list = [user | permission.users]
+      changeset = permission |> Permission.changeset(%{}) |> put_assoc(:users, user_list)
+      update_repo(changeset)
+     end)
+     {{:insert_permissions, user, notify}, event_permissions_inserts}
   end
   defp update_repo(changeset) do
     case Repo.update(changeset) do

@@ -38,17 +38,17 @@ defmodule UserManager.CreateUser.CreateUserDataValidator do
   def handle_events(events, from, state) do
     process_events = events
     |> Flow.from_enumerable
-    |> Flow.map(fn {:create_user, name, password, email, notify}  ->
+    |> Flow.map(fn e -> process_event(e) end)
+     |> Enum.to_list
+    {:noreply, process_events, state}
+  end
+  defp process_event({:create_user, name, password, email, notify}) do
      user_profile_changeset = UserProfile.changeset(%UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name" => name, "password" => password, "email" => email}}})
      case user_profile_changeset.valid? do
        true -> get_user_changeset(user_profile_changeset, notify)
         false -> {:validation_error, user_profile_changeset.errors, notify}
      end
-     end)
-     |> Enum.to_list
-    {:noreply, process_events, state}
   end
-
   defp get_user_changeset(user_profile_changeset, notify) do
     user = %UserSchema{} |> UserSchema.changeset(%{}) |> put_assoc(:user_profile, user_profile_changeset)
       case user.valid? do

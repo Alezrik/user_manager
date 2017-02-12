@@ -25,4 +25,17 @@ defmodule UserManager.Authorize.AuthorizeUserNotification do
 
         {:noreply, [], state}
       end
+
+      defp process_notification({:notify_success, :authorize_user, notify}) do
+        :ok = Process.send(notify, {:ok}, [])
+      end
+      defp process_notification({:notify_error, :token_decode_error, notify, reason}) do
+        :ok = Process.send(notify, {:error, :token_decode_error}, [])
+      end
+      defp process_notification({:notify_error, :token_not_found, notify}) do
+        :ok = Process.send(notify, {:error, :token_not_found}, [])
+      end
+      defp process_notification({:notify_error, :unauthorized, notify}) do
+        :ok = Process.send(notify, {:error, :unauthorized}, [])
+      end
 end

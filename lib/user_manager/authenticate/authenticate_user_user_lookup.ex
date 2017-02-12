@@ -35,25 +35,19 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
   def handle_events(events, from, state) do
     process_events = events
     |> Flow.from_enumerable
-    |> Flow.map(fn  {:authenticate_user, name, password, source, notify} ->
-      case GenServer.call(UserManager.UserRepo, {:get_user_id_for_authentication_name, name}) do
-        {:user_not_found} -> {:user_not_found_error, notify}
-        {user_id} ->
-          user = UserSchema
-          |> where(id: ^user_id)
-          |> Repo.one!
-          |> Repo.preload(:user_profile)
-          {:validate_user, user, password, source, notify}
-      end
-     end)
-     |> Enum.to_list
+    |> Flow.map(fn e -> process_event(e) end)
+    |> Enum.to_list
      {:noreply, process_events, state}
   end
-  defp get_user_profile_by_name(name) do
-    UserProfile
-    |> Repo.all
-    |> Enum.filter(fn p ->
-      Map.fetch!(p.authentication_metadata, "name") == name
-     end)
+  defp process_event({:authenticate_user, name, password, source, notify}) do
+    case GenServer.call(UserManager.UserRepo, {:get_user_id_for_authentication_name, name}) do
+      {:user_not_found} -> {:user_not_found_error, notify}
+      {user_id} ->
+        user = UserSchema
+        |> where(id: ^user_id)
+        |> Repo.one!
+        |> Repo.preload(:user_profile)
+        {:validate_user, user, password, source, notify}
+    end
   end
 end

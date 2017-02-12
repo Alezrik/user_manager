@@ -42,14 +42,16 @@ defmodule UserManager.Authorize.AuthorizeUserValidateToken do
   def handle_events(events, from, state) do
     process_events = events
     |> Flow.from_enumerable
-    |> Flow.map(fn {:authorize_token, token, permission_list, require_all, notify}  ->
-      case Guardian.decode_and_verify(token) do
-        {:error, :token_not_found} -> {:error, :token_not_found, notify}
-        {:error, reason} -> {:error, :token_decode_error, reason, notify}
-        {:ok, data} -> {:validate_permissions, data, permission_list, require_all, notify}
-      end
-     end)
-     |> Enum.to_list
-     {:noreply, process_events, state}
+    |> Flow.map(fn e -> process_event(e) end)
+    |> Enum.to_list
+    {:noreply, process_events, state}
+   end
+
+   defp process_event({:authorize_token, token, permission_list, require_all, notify}) do
+     case Guardian.decode_and_verify(token) do
+       {:error, :token_not_found} -> {:error, :token_not_found, notify}
+       {:error, reason} -> {:error, :token_decode_error, reason, notify}
+       {:ok, data} -> {:validate_permissions, data, permission_list, require_all, notify}
+     end
    end
 end

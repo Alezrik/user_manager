@@ -24,14 +24,15 @@ defmodule UserManager.CreateUser.CreateUserRepoInsert do
   def handle_events(events, from, state) do
     process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:insert_user)
     |> Flow.from_enumerable
-    |> Flow.map(fn {:insert_user, user_changeset, notify} ->
-      case Repo.insert(user_changeset) do
-        {:ok, user} -> {:insert_permissions, user, notify}
-        {:error, changeset} -> {:insert_error, changeset.errors, notify}
-      end
-     end)
+    |> Flow.map(fn e -> process_event(e) end)
     |> Enum.to_list
     un_processed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :insert_user)
     {:noreply, process_events ++ un_processed_events, state}
+  end
+  defp process_event({:insert_user, user_changeset, notify}) do
+    case Repo.insert(user_changeset) do
+      {:ok, user} -> {:insert_permissions, user, notify}
+      {:error, changeset} -> {:insert_error, changeset.errors, notify}
+    end
   end
 end

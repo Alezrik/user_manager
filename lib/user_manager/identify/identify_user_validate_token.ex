@@ -35,17 +35,17 @@ defmodule UserManager.Identify.IdentifyUserValidateToken do
       :token_not_found
 """
     def handle_events(events, from, state) do
-
       process_events = events
       |> Flow.from_enumerable
-      |> Flow.map(fn {:identify_user, token, notify}  ->
-        case Guardian.decode_and_verify(token) do
-          {:error, :token_not_found} -> {:error, :token_not_found, notify}
-          {:error, reason} -> {:error, :token_decode_error, reason, notify}
-          {:ok, data} -> {:deserialize_user, data, notify}
-        end
-       end)
-       |> Enum.to_list
-       {:noreply, process_events, state}
-     end
+      |> Flow.map(fn e  -> process_event(e) end)
+      |> Enum.to_list
+      {:noreply, process_events, state}
+    end
+    defp process_event({:identify_user, token, notify}) do
+      case Guardian.decode_and_verify(token) do
+        {:error, :token_not_found} -> {:error, :token_not_found, notify}
+        {:error, reason} -> {:error, :token_decode_error, reason, notify}
+        {:ok, data} -> {:deserialize_user, data, notify}
+      end
+    end
 end

@@ -11,16 +11,20 @@ defmodule UserManager.Identify.IdentifyUserNotification do
     def handle_events(events, from, state) do
       processed_events = events
       |> Flow.from_enumerable()
-      |> Flow.each(fn e ->
-          case e do
-            {:notify_success, :identify_user, notify, user} -> :ok = Process.send(notify, {:ok, user}, [])
-            {:notify_error, :user_deserialize_error, notify} -> :ok = Process.send(notify, {:error, :user_deserialize_error}, [])
-            {:notify_error, :token_not_found, notify} -> :ok = Process.send(notify, {:error, :token_not_found}, [])
-            {:notify_error, :token_decode_error, notify, reason} -> :ok = Process.send(notify, {:error, :token_decode_error, reason}, [])
-          end
-
-       end)
+      |> Flow.each(fn e -> process_notification(e) end)
        |> Enum.to_list
        {:noreply, [], state}
+    end
+    defp process_notification({:notify_success, :identify_user, notify, user}) do
+      :ok = Process.send(notify, {:ok, user}, [])
+    end
+    defp process_notification({:notify_error, :user_deserialize_error, notify}) do
+      :ok = Process.send(notify, {:error, :user_deserialize_error}, [])
+    end
+    defp process_notification({:notify_error, :token_not_found, notify}) do
+      :ok = Process.send(notify, {:error, :token_not_found}, [])
+    end
+    defp process_notification({:notify_error, :token_decode_error, notify, reason}) do
+      :ok = Process.send(notify, {:error, :token_decode_error, reason}, [])
     end
 end
