@@ -33,13 +33,15 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
     process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_user)
     |> Flow.from_enumerable
     |> Flow.map(fn {:validate_user, user, password, source, notify} ->
-      authenticate_user(password, user.user_profile.password, user, source, notify)
+      pass = user.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("password")
+      authenticate_user(password, pass, user, source, notify)
      end)
      |> Enum.to_list
      un_processed_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :validate_user)
       {:noreply, process_events ++ un_processed_events, state}
   end
   defp authenticate_user(input_password, encrypted_password, user, source, notify) do
+    Logger.debug "input: #{inspect input_password}, encrypt: #{inspect encrypted_password}"
     case Bcrypt.checkpw(input_password, encrypted_password) do
       true -> {:authenticate_user, user, source, notify}
       false -> {:authenticate_failure, notify}

@@ -18,8 +18,8 @@ defmodule UserManager.CreateUser.CreateUserNotificationFormatter do
 
     ### strip messages without notify endpoints
 
-      iex>UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:ok, nil, %UserManager.Schemas.User{}}], nil, [])
-      {:noreply, [], []}
+      iex>UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:ok, nil, %UserManager.Schemas.UserSchema{id: 2}}], nil, [])
+      {:noreply, [{:create_user_notify, 2}], []}
 
       iex>UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:update_permission_error, nil, ""}], nil, [])
       {:noreply, [], []}
@@ -32,9 +32,13 @@ defmodule UserManager.CreateUser.CreateUserNotificationFormatter do
 
     ### generate notifications for items with notify
 
-      iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:ok, self(), %UserManager.Schemas.User{}}], self(), [])
-      iex>Enum.at(Tuple.to_list(Enum.at(response,0)),0)
+      iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:ok, self(), %UserManager.Schemas.UserSchema{id: 2}}], self(), [])
+      iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
       :notify_success
+      iex>Enum.count(response)
+      2
+      iex>Enum.at(Tuple.to_list(Enum.at(response, 1)), 0)
+      :create_user_notify
 
       iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserNotificationFormatter.handle_events([{:validation_error, "", self()}], self(), [])
       iex>Enum.at(Tuple.to_list(Enum.at(response,0)) ,0)
@@ -59,11 +63,11 @@ defmodule UserManager.CreateUser.CreateUserNotificationFormatter do
       |> Flow.from_enumerable
       |> Flow.flat_map(fn e ->
           case e do
-             {:ok, nil, _} -> []
+             {:ok, nil, user} -> [{:create_user_notify, user.id}]
              {:update_permission_error, nil, _} -> []
              {:validation_error, _, nil} -> []
              {:insert_error, _, nil} -> []
-             {:ok, notify, user} -> [{:notify_success, :create_user, notify, user}]
+             {:ok, notify, user} -> [{:notify_success, :create_user, notify, user}, {:create_user_notify, user.id}]
              {:update_permission_error, notify, errors} -> [{:notify_error, :update_permission_error, notify, errors}]
              {:validation_error, errors, notify} -> [{:notify_error, :create_user_validation_error, notify, errors}]
              {:insert_error, errors, notify} -> [{:notify_error, :create_user_insert_error, notify, errors}]

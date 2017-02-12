@@ -1,4 +1,4 @@
 defmodule UserSchemaTest do
   use ExUnit.Case
-  doctest UserManager.Schemas.User
+  doctest UserManager.Schemas.UserSchema
 end

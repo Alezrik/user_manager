@@ -16,7 +16,7 @@ defmodule UserManager.CreateUser.CreateUserRepoInsert do
 
   ## Examples
 
-     iex>userchangeset =UserManager.Schemas.User.changeset( %UserManager.Schemas.User{}, %{})
+     iex>userchangeset =UserManager.Schemas.UserSchema.changeset( %UserManager.Schemas.UserSchema{}, %{})
      iex>{:noreply, response, state} = UserManager.CreateUser.CreateUserRepoInsert.handle_events([{:insert_user, userchangeset, nil}], self(), [])
      iex>Enum.at(Tuple.to_list(Enum.at(response,0)),0)
      :insert_permissions

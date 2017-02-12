@@ -14,7 +14,7 @@ defmodule UserManager.Schemas.Permission do
   import Ecto.Changeset
   schema "permissions" do
     field :name
-    many_to_many :users, UserManager.Schemas.User, join_through: "permissions_to_users"
+    many_to_many :users, UserManager.Schemas.UserSchema, join_through: "permissions_to_users"
     belongs_to :permission_group, UserManager.Schemas.PermissionGroup
     timestamps()
   end

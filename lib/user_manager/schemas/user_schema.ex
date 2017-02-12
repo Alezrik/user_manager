@@ -1,10 +1,10 @@
-defmodule UserManager.Schemas.User do
+defmodule UserManager.Schemas.UserSchema do
   @moduledoc """
   schema for basic user
 
   ## Examples
 
-      iex>UserManager.Schemas.User.changeset(%UserManager.Schemas.User{}, %{}).valid?
+      iex>UserManager.Schemas.UserSchema.changeset(%UserManager.Schemas.UserSchema{}, %{}).valid?
       true
 
 """

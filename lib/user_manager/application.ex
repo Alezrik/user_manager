@@ -12,6 +12,8 @@ defmodule UserManager.Application do
       # Starts a worker by calling: UserManager.Worker.start_link(arg1, arg2, arg3)
       # worker(UserManager.Worker, [arg1, arg2, arg3]),
       worker(UserManager.Repo, []),
+      worker(UserManager.UserRepo, [:ok, [name: UserManager.UserRepo]]),
+      worker(UserManager.PermissionRepo, [:ok, [name: UserManager.PermissionRepo]]),
       supervisor(UserManager.Authenticate.AuthenticateWorkflowSupervisor.Supervisor, [:ok]),
       supervisor(UserManager.Authorize.AuthorizeWorkflowSupervisor.Supervisor, [:ok]),
       supervisor(UserManager.CreateUser.CreateUserWorkflowSupervisor.Supervisor, [:ok]),

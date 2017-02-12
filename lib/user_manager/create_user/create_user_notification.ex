@@ -17,6 +17,7 @@ defmodule UserManager.CreateUser.CreateUserNotification do
           {:notify_error, :create_user_validation_error, notify, errors} -> :ok = Process.send(notify, {:error, :create_user_validation_error, errors}, [])
           {:notify_error, :update_permission_error, notify, errors} -> :ok = Process.send(notify, {:error, :update_permission_error, errors}, [])
           {:notify_error, :create_user_insert_error, notify, errors} -> :ok = Process.send(notify, {:error, :create_user_insert_error, errors}, [])
+          {:create_user_notify, user_id} -> GenServer.cast(UserManager.UserRepo, {:create_user_notify, user_id})
         end
      end) |> Enum.to_list
 

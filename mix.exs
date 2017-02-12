@@ -39,7 +39,7 @@ defmodule UserManager.Mixfile do
         {:guardian, "~> 0.14"},
         {:guardian_db, "~> 0.8.0"}, {:faker, "~> 0.7"}, {:credo, "~> 0.5", only: [:dev, :test]},
         {:dialyxir, "~> 0.4", only: [:dev], runtime: false}, {:gen_stage, "~> 0.11"}, {:flow, "~> 0.11"}, {:ex_doc, "~> 0.14", only: :dev}, {:comeonin, "~> 3.0"},
-          {:excoveralls, "~> 0.6", only: :test}]
+        {:excoveralls, "~> 0.6", only: :test}, {:exprof, "~> 0.2.0"}]
   end
 
   defp aliases do
