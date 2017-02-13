@@ -8,6 +8,9 @@
 
 This module is a collection of GenStage work-flows for managing Users and User Accounts.
 
+## Versions
+* hex_version: 0.1.0
+* git_master_version: 0.2.0
 
 ## Installation
 
@@ -36,6 +39,14 @@ UserManager.UserManagerApi.identify_user(token)
 * Authorize User
 
 UserManager.UserManagerApi.authorize_claims(token, permission_list, require_all \\ true) 
+
+## Integrated Components
+* Guardian - https://github.com/ueberauth/guardian
+  * Token generation / permission handling
+* GuardianDb - https://github.com/ueberauth/guardian_db
+  * Additional token validation / db serialization of token data
+* Comeonin - https://github.com/riverrun/comeonin
+  * Validated field encryption with bcrypt
 
 ## Scope
 
