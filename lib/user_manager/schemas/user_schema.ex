@@ -1,12 +1,6 @@
 defmodule UserManager.Schemas.UserSchema do
   @moduledoc """
   schema for basic user
-
-  ## Examples
-
-      iex>UserManager.Schemas.UserSchema.changeset(%UserManager.Schemas.UserSchema{}, %{}).valid?
-      true
-
 """
   use Ecto.Schema
   import Ecto.Changeset
@@ -16,6 +10,14 @@ defmodule UserManager.Schemas.UserSchema do
     many_to_many :permissions, UserManager.Schemas.Permission, join_through: "permissions_to_users", on_replace: :delete
     timestamps()
   end
+  @doc """
+  changeset for UserSchema
+
+  ## Examples
+
+    iex>UserManager.Schemas.UserSchema.changeset(%UserManager.Schemas.UserSchema{}, %{}).valid?
+    true
+"""
   def changeset(user, params \\ %{}) do
     cast(user, params, [])
   end

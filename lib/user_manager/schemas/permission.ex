@@ -18,6 +18,17 @@ defmodule UserManager.Schemas.Permission do
     belongs_to :permission_group, UserManager.Schemas.PermissionGroup
     timestamps()
   end
+  @doc """
+  setup changeset for Permission
+
+  ## Usage examples
+
+    iex>UserManager.Schemas.Permission.changeset(%UserManager.Schemas.Permission{}, %{"name" => Faker.Name.first_name}).valid?
+    true
+
+    iex>UserManager.Schemas.Permission.changeset(%UserManager.Schemas.Permission{}, %{}).valid?
+    false
+"""
   def changeset(permission, params \\ %{}) do
     permission
     |> cast(params, [:name])

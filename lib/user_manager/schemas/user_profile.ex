@@ -1,23 +1,6 @@
 defmodule UserManager.Schemas.UserProfile do
   @moduledoc """
   Schema for UserProfiles
-
-    ## Examples
-
-      iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name"=>"fdsafdsa", "password"=>"fdsafdsafdsa", "email"=>"fdsafdsa@fdsafdsa.com"}}}).valid?
-      true
-
-      iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name"=>"", "password"=>"fdsafdsafdsa", "email"=>"fdsafdsa@fdsafdsa.com"}}}).valid?
-      false
-
-      iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name"=>"fdsafdsa", "password"=>"", "email"=>"fdsafdsa@fdsafdsa.com"}}}).valid?
-      false
-
-      iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name"=>"fdsafdsa", "password"=>"fdsafdsafdsa", "email"=>""}}}).valid?
-      false
-
-      iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{}).valid?
-      false
 """
   use Ecto.Schema
   import Ecto.Changeset
@@ -28,6 +11,26 @@ defmodule UserManager.Schemas.UserProfile do
     belongs_to :user_schema, UserManager.Schemas.UserSchema
     timestamps()
   end
+  @doc """
+  setup changeset for user_profile
+
+  ## Examples
+
+    iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name"=>"fdsafdsa", "password"=>"fdsafdsafdsa", "email"=>"fdsafdsa@fdsafdsa.com"}}}).valid?
+    true
+
+    iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name"=>"", "password"=>"fdsafdsafdsa", "email"=>"fdsafdsa@fdsafdsa.com"}}}).valid?
+    false
+
+    iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name"=>"fdsafdsa", "password"=>"", "email"=>"fdsafdsa@fdsafdsa.com"}}}).valid?
+    false
+
+    iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{"authentication_metadata" => %{"credentials" => %{"name"=>"fdsafdsa", "password"=>"fdsafdsafdsa", "email"=>""}}}).valid?
+    false
+
+    iex>UserManager.Schemas.UserProfile.changeset(%UserManager.Schemas.UserProfile{}, %{}).valid?
+    false
+"""
   def changeset(user_profile, params \\ %{}) do
     metadata = Map.get(params, "authentication_metadata", %{})
     credential_metadata = Map.get(metadata, "credentials", %{})
@@ -56,7 +59,7 @@ defmodule UserManager.Schemas.UserProfile do
     |> validate_required([:authentication_metadata])
     |> validate_params()
   end
-  def validate_duplicate(changeset) do
+  defp validate_duplicate(changeset) do
     md = case get_field(changeset, :authentication_metadata) do
           nil -> :error
           something -> Map.fetch!(something, "credentials")
@@ -71,7 +74,7 @@ defmodule UserManager.Schemas.UserProfile do
        end
     end
   end
-  def validate_params(changeset, authentication_provider \\ "credentials") do
+  defp validate_params(changeset, authentication_provider \\ "credentials") do
     md = case get_field(changeset, :authentication_metadata) do
       nil -> %{}
       something -> Map.fetch!(something, "credentials")
