@@ -9,5 +9,4 @@ config :user_manager, UserManager.Repo,
   password: ""
 
 config :user_manager,
-  new_user_default_permissions: %{default: [:read]},
   syncronous_api_timeout: 1000
