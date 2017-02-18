@@ -17,7 +17,7 @@ defmodule AuthenticationApiTest do
       assert user.id > 0
       user =  Repo.preload(user, :user_profile)
       assert user.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("name") == "testuser1"
-      assert Comeonin.Bcrypt.checkpw("testpassword1", user.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("password"))
+      assert Comeonin.Bcrypt.checkpw("testpassword1", user.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("secretkey"))
     end
     test "invalid authenticate" do
       {:error, :authenticate_failure} = UserManager.UserManagerApi.authenticate_user("testuser1", "")

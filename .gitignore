@@ -22,3 +22,6 @@ mix.lock
 usermanager.iml
 .idea/
 fprof.trace
+docs/
+env_setup.sh
+ttb_last_config

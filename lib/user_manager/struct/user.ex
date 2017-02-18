@@ -26,10 +26,19 @@ defmodule UserManager.Struct.User do
      end)
     authenticate_providers = case basic_user_record.user_profile == nil do
     true -> []
-    false -> [{:credential, basic_user_record.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("name"),
-                            basic_user_record.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("password"),
+    false -> credentials = [{:credential, basic_user_record.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("name"),
+                            basic_user_record.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("secretkey"),
                             basic_user_record.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("email")}
               ]
+              case Map.fetch(basic_user_record.user_profile.authentication_metadata, "facebook") do
+                :error -> credentials
+                {:ok, value} -> credentials ++ [{:facebook, basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("name"),
+                                                basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("id"),
+                                                basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("email"),
+                                                basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("token"),
+                                                basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("expire"),
+                                                }]
+              end
     end
     %UserManager.Struct.User{user_schema_id: user_schema_id, user_profile_id: user_profile_id, authenticate_providers: authenticate_providers, permissions: permissions}
   end

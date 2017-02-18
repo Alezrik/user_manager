@@ -63,4 +63,13 @@ defmodule UserManager.UserManagerApi do
       end
     end) |> Task.await(Application.get_env(:user_manager, :syncronous_api_timeout))
   end
+  @spec create_facebook_profile(Integer.t, String.t) :: Tuple.t
+  def create_facebook_profile(user_id, facebook_code_token) do
+    UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
+      GenServer.cast(UserManager.CreateFacebookProfile.CreateFacebookProfileProducer, {:create_facebook_profile, facebook_code_token, user_id, self()})
+      receive do
+        some_msg -> some_msg
+      end
+     end) |> Task.await(Application.get_env(:user_manager, :facebook_profile_timeout))
+  end
 end

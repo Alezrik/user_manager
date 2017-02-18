@@ -32,67 +32,123 @@ defmodule UserManager.Schemas.UserProfile do
     false
 """
   def changeset(user_profile, params \\ %{}) do
-    metadata = Map.get(params, "authentication_metadata", %{})
-    credential_metadata = Map.get(metadata, "credentials", %{})
-    encrypted_password_credentials = case credential_metadata do
-      i when map_size(i) < 1 -> %{}
-      map ->
-      password =  Map.get(map, "password", "")
-      password = case String.length(password) < 8 do
-        true -> ""
-        false -> Bcrypt.hashpwsalt(password)
-      end
-      Map.put(map, "password", password)
-    end
-    updated_metadata = case metadata do
-      i when map_size(i) < 1 -> params
-      value -> case credential_metadata do
-                :error ->
-                params
-                cred ->
-                  credentials = Map.merge(cred, encrypted_password_credentials)
-                  Map.merge(params, %{"authentication_metadata" => %{"credentials" => credentials}})
-                end
-    end
     user_profile
-    |> cast(updated_metadata, [:authentication_metadata])
-    |> validate_required([:authentication_metadata])
-    |> validate_params()
+    |> cast(params, [:authentication_metadata])
+    |> validate_required(:authentication_metadata)
+    |> validate_credentials
   end
-  defp validate_duplicate(changeset) do
-    md = case get_field(changeset, :authentication_metadata) do
-          nil -> :error
-          something -> Map.fetch!(something, "credentials")
+  defp validate_credentials(changeset) do
+    changeset
+    |> validate_credentials_exist(:authentication_metadata)
+    |> validate_credentials_field_exists(:authentication_metadata, "name")
+    |> validate_password_or_encrypted_exists(:authentication_metadata, "password", "secretkey")
+    |> validate_credentials_field_exists(:authentication_metadata, "email")
+    |> validate_credentials_field_min_length(:authentication_metadata, "password", 8)
+    |> validate_credentials_field_min_length(:authentication_metadata, "name", 6)
+    |> validate_credentials_field_min_length(:authentication_metadata, "email", 2)
+    |> encrypt_password_to_key(:authentication_metadata, "password", "secretkey")
+    |> validate_facebook_field_exists(:authentication_metadata, "name")
+    |> validate_facebook_field_exists(:authentication_metadata, "email")
+    |> validate_facebook_field_exists(:authentication_metadata, "expire")
+    |> validate_facebook_field_exists(:authentication_metadata, "token")
+    |> validate_facebook_field_exists(:authentication_metadata, "id")
+    |> encrypt_facebook_field(:authentication_metadata, "token")
+    |> encrypt_facebook_field(:authentication_metadata, "id")
+    |> encrypt_facebook_field(:authentication_metadata, "expire")
+  end
+  defp encrypt_facebook_field(changeset, field, field_name) do
+    case fetch_field(changeset, field) do
+          :error -> changeset
+          {_, nil} -> changeset
+          {_, ch} -> case Map.fetch(ch, "facebook") do
+            :error -> changeset
+            {_, f} -> process_facebook_encrypt_field(changeset, field, ch, f, field_name)
+          end
         end
-    case md do
+  end
+  defp process_facebook_encrypt_field(changeset, field,  field_map, facebook_map, field_name) do
+    case Map.fetch(facebook_map, field_name) do
       :error -> changeset
-      v -> username = Map.get(v, "name", "")
-            email = Map.get(v, "email", "")
-       case GenServer.call(UserManager.UserRepo, {:validate_credential_name_email, username, email}) do
-         :ok -> changeset
-         :duplicate -> add_error(changeset, :authentication_metadata, "name and email must be unique")
-       end
-    end
+      {_, v} -> encrypted = Cipher.encrypt(v)
+        encrypted = field_map |> Map.fetch!("facebook") |> Map.put(field_name, encrypted)
+        new_credentials = Map.put(field_map, "facebook", encrypted)
+        put_change(changeset, field, new_credentials)
+     end
   end
-  defp validate_params(changeset, authentication_provider \\ "credentials") do
-    md = case get_field(changeset, :authentication_metadata) do
-      nil -> %{}
-      something -> Map.fetch!(something, "credentials")
-    end
-    required_fields = [{:name, 6}, {:password, 8}, {:email, 8}]
-    Enum.reduce(required_fields, changeset, fn {tag, len}, acc ->
-      case Map.fetch(md, Atom.to_string(tag)) do
-        :error ->  add_error(acc, tag, Atom.to_string(tag) <> " is a required field")
-        {:ok, item} ->
-          verify_length(item, len, tag, acc)
+  defp validate_facebook_field_exists(changeset, field, field_name) do
+    case fetch_field(changeset, field) do
+      :error -> add_error(changeset, field, "credentials do not exist!")
+      {_, nil} -> add_error(changeset, field, "credentials do not exist!")
+      {_, ch} -> case Map.fetch(ch, "facebook") do
+        :error -> changeset
+        {_, f} -> process_facebook_field_exists(changeset, field, f, field_name)
+        end
       end
-     end)
   end
-  defp verify_length(str_field, length, tag, changeset) do
-    case String.length(str_field) < length do
-      true ->
-        add_error(changeset, tag, Atom.to_string(tag) <> "requires a length of #{length}")
-      false -> changeset
+  defp process_facebook_field_exists(changeset, field, facebook_map, field_name) do
+    case Map.fetch(facebook_map, field_name) do
+      :error -> add_error(changeset, field, "facebook is missing #{field_name}")
+      {_, v} -> changeset
+      end
+  end
+  defp validate_password_or_encrypted_exists(changeset, field, password_field, encrypted_password_field) do
+    case fetch_field(changeset, field) do
+      :error -> add_error(changeset, field, "credentials do not exist!")
+      {_, nil} -> add_error(changeset, field, "credentials do not exist!")
+      {_, ch} -> case ch |> Map.get("credentials", %{}) |> Map.get(password_field, encrypted_password_field) do
+        nil -> add_error(changeset, field, "password does not exist!")
+        item -> changeset
+      end
+    end
+  end
+  defp encrypt_password_to_key(changeset, field, raw_password, destination_encrypt) do
+    case fetch_field(changeset, field) do
+      :error -> changeset
+      {_, nil} -> changeset
+      {_, ch} -> case ch |> Map.get("credentials", %{}) |> Map.get(raw_password, "") do
+        "" -> changeset
+        passwd ->
+          new_field = updated_credentials = ch |> Map.fetch!("credentials") |> Map.put(destination_encrypt, Bcrypt.hashpwsalt(passwd)) |> Map.delete(raw_password)
+          new_credentials =  Map.put(ch, "credentials", new_field)
+          put_change(changeset, field, new_credentials)
+      end
+    end
+  end
+  defp validate_credentials_exist(changeset, field) do
+    case fetch_field(changeset, field) do
+      :error -> add_error(changeset, field, "credentials do not exist")
+      {_, nil} -> add_error(changeset, field, "credentials do not exist")
+      {_, credentials} ->
+          case Map.get(credentials, "credentials", %{}) do
+        i when map_size(i) < 1 -> add_error(changeset, field, "credentials do not exist")
+        other -> changeset
+      end
+    end
+  end
+  defp validate_credentials_field_exists(changeset, field, credentials_field) do
+    case fetch_field(changeset, field) do
+      :error -> add_error(changeset, field, "#{credentials_field} does not exist")
+      {_, nil} -> add_error(changeset, field, "#{credentials_field} does not exist")
+      {_, ch} -> case ch |> Map.get("credentials", %{}) |> Map.fetch(credentials_field) do
+        :error -> add_error(changeset, field, "#{credentials_field} does not exist")
+        success -> changeset
+      end
+    end
+  end
+  defp validate_credentials_field_min_length(changeset, field, credentials_field, length) do
+    case fetch_field(changeset, field) do
+      :error -> changeset
+      {_, nil} -> changeset
+      {_, ch} -> case ch |> Map.get("credentials", %{}) |> Map.fetch(credentials_field) do
+        :error -> changeset
+        {:ok, value} -> validate_string_len(changeset, field, value, credentials_field, length)
+      end
+    end
+  end
+  defp validate_string_len(changeset, field, str, credentials_field, length) do
+    case String.length(str) >= length do
+      true -> changeset
+      false -> add_error(changeset, field, "#{credentials_field} requires a min length of: #{length}")
     end
   end
 end

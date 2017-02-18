@@ -40,7 +40,7 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
     {:noreply, process_events ++ un_processed_events, state}
   end
   defp process_event({:validate_user, user, password, source, notify}) do
-    encrypted_password = user.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("password")
+    encrypted_password = user.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("secretkey")
     case Bcrypt.checkpw(password, encrypted_password) do
       true -> {:authenticate_user, user, source, notify}
       false -> {:authenticate_failure, notify}

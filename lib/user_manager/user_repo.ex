@@ -24,6 +24,16 @@ defmodule UserManager.UserRepo do
        true -> {:reply, :duplicate, state}
      end
   end
+  def handle_call({:get_profile_id_for_user_id, user_id}, _from, state) do
+    response = state |> Enum.filter(fn u ->
+      u.user_schema_id == user_id
+     end)
+     |> Enum.map(fn u -> u.user_profile_id end)
+     case response do
+       [] -> {:reply, {:user_not_found}, state}
+       [id] -> {:reply, {id}, state}
+     end
+  end
   def handle_call({:get_user_id_for_authentication_name, authentication_name}, _from, state) do
     response = Enum.filter(state, fn u ->
       provider = Enum.filter(u.authenticate_providers, fn provider ->

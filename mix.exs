@@ -12,7 +12,7 @@ defmodule UserManager.Mixfile do
      deps: deps(),
      test_coverage: [tool: ExCoveralls],
      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
-     package: package]
+     package: package()]
   end
 
   # Configuration for the OTP application
@@ -20,7 +20,7 @@ defmodule UserManager.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
-    [extra_applications: [:logger, :poolboy],
+    [extra_applications: [:logger, :poolboy, :httpoison],
      mod: {UserManager.Application, []}]
   end
 
@@ -39,7 +39,8 @@ defmodule UserManager.Mixfile do
         {:guardian, "~> 0.14"},
         {:guardian_db, "~> 0.8.0"}, {:faker, "~> 0.7"}, {:credo, "~> 0.5", only: [:dev, :test]},
         {:dialyxir, "~> 0.4", only: [:dev], runtime: false}, {:gen_stage, "~> 0.11"}, {:flow, "~> 0.11"}, {:ex_doc, "~> 0.14", only: :dev}, {:comeonin, "~> 3.0"},
-        {:excoveralls, "~> 0.6", only: :test}, {:exprof, "~> 0.2.0"}, {:inch_ex, only: :docs}]
+        {:excoveralls, "~> 0.6", only: :test}, {:exprof, "~> 0.2.0"}, {:inch_ex, only: :docs},
+        {:facebook, "~> 0.9.0"}, {:cipher, ">= 1.3.0"}, {:httpoison, "~> 0.10.0"}]
   end
 
   defp aliases do
@@ -54,7 +55,7 @@ defmodule UserManager.Mixfile do
   A User Management system for Elixir Projects
 """
   end
-  def package do
+  def package() do
     [
     maintainers: ["Stephen Daubert"],
     licenses: ["MIT"],

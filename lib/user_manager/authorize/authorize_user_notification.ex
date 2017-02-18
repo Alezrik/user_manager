@@ -13,14 +13,7 @@ defmodule UserManager.Authorize.AuthorizeUserNotification do
       def handle_events(events, from, state) do
         processed_events = events
         |> Flow.from_enumerable()
-        |> Flow.each(fn e ->
-            case e do
-              {:notify_success, :authorize_user, notify} -> :ok = Process.send(notify, {:ok}, [])
-             {:notify_error, :token_decode_error, notify, reason} -> :ok = Process.send(notify, {:error, :token_decode_error}, [])
-              {:notify_error, :token_not_found, notify} -> :ok = Process.send(notify, {:error, :token_not_found}, [])
-              {:notify_error, :unauthorized, notify} -> :ok = Process.send(notify, {:error, :unauthorized}, [])
-            end
-         end)
+        |> Flow.each(fn e -> process_notification(e) end)
          |> Enum.to_list
 
         {:noreply, [], state}

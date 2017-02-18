@@ -18,6 +18,8 @@ defmodule UserManager.Application do
       supervisor(UserManager.Authorize.AuthorizeWorkflowSupervisor.Supervisor, [:ok]),
       supervisor(UserManager.CreateUser.CreateUserWorkflowSupervisor.Supervisor, [:ok]),
       supervisor(UserManager.Identify.IdentifyUserWorkflowSupervisor.Supervisor, [:ok]),
+      supervisor(UserManager.CreateFacebookProfile.CreateFacebookProfileSupervisor.Supervisor, [:ok]),
+      supervisor(UserManager.Extern.ExternalProxySupervisor.Supervisor, [:ok]),
       supervisor(Task.Supervisor, [[name: UserManager.Task.Supervisor]])
 
     ]

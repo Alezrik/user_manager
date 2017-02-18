@@ -23,6 +23,22 @@ def deps do
 end
 ```
 
+## Environment Variables
+
+<code>
+export GUARDIAN_SECRET_KEY="SomeTemporarySuperSecretKeyOnlyIKnow!"
+
+export CIPHER_KEY_PHRASE="testiekeyphraseforcipher"
+
+export CIPHER_IV_PHRASE="testieivphraseforcipher" 
+
+export CIPHER_MAGIC_TOKEN="magictoken" 
+
+export FACEBOOK_APP_SECRET="your app secret"
+
+export FACEBOOK_CLIENT_ID="your app client id"
+</code>
+
 ## Api Usage
 
 * Create User
@@ -40,6 +56,13 @@ UserManager.UserManagerApi.identify_user(token)
 * Authorize User
 
 UserManager.UserManagerApi.authorize_claims(token, permission_list, require_all \\ true) 
+
+* Create Facebook Profile
+   * Note: Returns still need to be processed before returning to client, raw json, status_codes etc are in return types
+
+UserManager.UserManagerApi.create_facebook_profile(user_id, facebook_code_token)
+
+
 
 ## Integrated Components
 * Guardian - https://github.com/ueberauth/guardian

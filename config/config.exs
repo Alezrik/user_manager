@@ -11,7 +11,12 @@ config :user_manager, ecto_repos: [UserManager.Repo]
 
 config :user_manager,
   new_user_default_permissions: %{default: [:read], authenticate: [:credential]},
-  syncronous_api_timeout: 60_000
+  syncronous_api_timeout: 60_000,
+  facebook_client_id: System.get_env("FACEBOOK_CLIENT_ID"),
+  facebook_redirect_uri: "http://localhost:4000/",
+  facebook_proxy: UserManager.Extern.FacebookProxy,
+  facebook_profile_timeout: 30_000
+
 config :guardian, Guardian,
   allowed_algos: ["HS512"], # optional
   verify_module: Guardian.JWT,  # optional
@@ -19,7 +24,7 @@ config :guardian, Guardian,
   ttl: { 30, :days },
   allowed_drift: 2000,
   verify_issuer: true, # optional
-  secret_key: "SomeTemporarySuperSecretKeyOnlyIKnow!",
+  secret_key: "#{System.get_env("GUARDIAN_SECRET_KEY")}",
   serializer: UserManager.GuardianSerializer,
   hooks: GuardianDb,
   permissions: %{
@@ -31,7 +36,13 @@ config :guardian, Guardian,
 config :guardian_db, GuardianDb,
            repo: UserManager.Repo,
            sweep_interval: 120
+config :cipher, keyphrase: System.get_env("CIPHER_KEY_PHRASE"),
+                ivphrase: System.get_env("CIPHER_IV_PHRASE"),
+                magic_token: System.get_env("CIPHER_MAGIC_TOKEN")
 
+config :facebook,
+   appsecret: System.get_env("FACEBOOK_APP_SECRET"),
+   graph_url: "https://graph.facebook.com/v2.8/"
 # You can configure for your application as:
 #
 #     config :user_manager, key: :value
