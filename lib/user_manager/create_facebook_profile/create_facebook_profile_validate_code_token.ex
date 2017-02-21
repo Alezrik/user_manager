@@ -30,35 +30,30 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileValidateCodeTok
   def handle_events(events, from, state) do
     process_events = events
     |> Flow.from_enumerable()
-    |> Flow.map(fn e -> process_event(e) end)
-    |> Flow.map(fn e -> parse_access_token(e) end)
+    |> Flow.flat_map(fn e -> process_event(e) end)
+    |> Flow.flat_map(fn e -> parse_access_token(e) end)
     |> Enum.to_list
     {:noreply, process_events, state}
   end
   defp process_event({:create_facebook_profile, code_token, user_id, notify}) do
     {response, status_code} = @facebook_proxy.get_access_key_from_code(code_token)
-    Logger.debug "code to access token response: #{inspect response}"
-
     case status_code == 200 do
       true ->
       response_json = Poison.Parser.parse!(response)
-      {:parse_access_token, response_json, user_id, notify}
+      [{:parse_access_token, response_json, user_id, notify}]
       false ->
-       {:access_token_error, response, status_code, user_id, notify}
+        UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_facebook_profile, :access_token_error, UserManager.Notifications.NotificationMetadataHelper.build_facebook_api_error(status_code, response), notify)
     end
   end
   defp parse_access_token({:parse_access_token, response_json, user_id, notify}) do
     case Map.get(response_json, "access_token", "") do
-      "" -> {:access_token_missing, response_json, user_id, notify}
+      "" -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_facebook_profile, :access_token_validation_error, UserManager.Notifications.NotificationMetadataHelper.build_facebook_access_token_validation_error("access_token missing", response_json), notify)#{:access_token_missing, response_json, user_id, notify}
       token ->
         case Map.get(response_json, "expires_in", -1) do
-          -1 -> {:expire_time_missing, response_json, user_id, notify}
-          other -> {:process_access_token, token, other, user_id, notify}
+          -1 -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_facebook_profile, :access_token_validation_error, UserManager.Notifications.NotificationMetadataHelper.build_facebook_access_token_validation_error("expire_time missing", response_json), notify)#{:expire_time_missing, response_json, user_id, notify}
+          other -> [{:process_access_token, token, other, user_id, notify}]
         end
 
     end
-  end
-  defp parse_access_token({:access_token_error, response_json, status_code, user_id, notify}) do
-    {:access_token_error, response_json, status_code, user_id, notify}
   end
 end

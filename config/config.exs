@@ -15,7 +15,15 @@ config :user_manager,
   facebook_client_id: System.get_env("FACEBOOK_CLIENT_ID"),
   facebook_redirect_uri: "http://localhost:4000/",
   facebook_proxy: UserManager.Extern.FacebookProxy,
-  facebook_profile_timeout: 30_000
+  facebook_profile_timeout: 30_000,
+  notification_workflow_and_codes: [{:authenticate, [:user_not_found, :authenticate_failure, :token_storage_failure,
+                                                      :token_error, :success, :authorization_failure]},
+                                   {:authorize, [:token_not_found, :token_decode_error, :success, :unauthorized]},
+                                   {:create_facebook_profile, [:access_token_error, :server_token_error,
+                                                              :access_token_validation_error, :server_token_validation_error,
+                                                              :validation_error, :success]},
+                                   {:create_user, [:success, :validation_error, :update_error]},
+                                   {:identify_user, [:token_not_found, :token_decode_error, :user_deserialize_error, :success]}]
 
 config :guardian, Guardian,
   allowed_algos: ["HS512"], # optional

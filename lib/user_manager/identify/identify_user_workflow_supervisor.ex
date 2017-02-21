@@ -10,9 +10,7 @@ defmodule UserManager.Identify.IdentifyUserWorkflowSupervisor.Supervisor do
     children = [
       worker(UserManager.Identify.IdentifyUserProducer, [:ok]),
       worker(UserManager.Identify.IdentifyUserValidateToken, [:ok]),
-      worker(UserManager.Identify.IdentifyUserDeserializer, [:ok]),
-      worker(UserManager.Identify.IdentifyUserNotificationFormatter, [:ok]),
-      worker(UserManager.Identify.IdentifyUserNotification, [:ok])
+      worker(UserManager.Identify.IdentifyUserDeserializer, [:ok])
     ]
     supervise(children, strategy: :one_for_one)
   end

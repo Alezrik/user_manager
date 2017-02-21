@@ -12,8 +12,8 @@ defmodule UserManager.Authenticate.AuthenticateWorkflowSupervisor.Supervisor do
       worker(UserManager.Authenticate.AuthenticateUserUserLookup, [:ok]),
       worker(UserManager.Authenticate.AuthenticateUserValidation, [:ok]),
       worker(UserManager.Authenticate.AuthenticateUserTokenGenerate, [:ok]),
-      worker(UserManager.Authenticate.AuthenticateUserNotificationFormatter, [:ok]),
-      worker(UserManager.Authenticate.AuthenticateUserNotification, [:ok])
+#      worker(UserManager.Authenticate.AuthenticateUserNotificationFormatter, [:ok]),
+#      worker(UserManager.Authenticate.AuthenticateUserNotification, [:ok])
     ]
     supervise(children, strategy: :one_for_one)
   end

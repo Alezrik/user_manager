@@ -20,6 +20,7 @@ defmodule UserManager.Application do
       supervisor(UserManager.Identify.IdentifyUserWorkflowSupervisor.Supervisor, [:ok]),
       supervisor(UserManager.CreateFacebookProfile.CreateFacebookProfileSupervisor.Supervisor, [:ok]),
       supervisor(UserManager.Extern.ExternalProxySupervisor.Supervisor, [:ok]),
+      supervisor(UserManager.Notifications.NotificationSupervisor.Supervisor, [:ok]),
       supervisor(Task.Supervisor, [[name: UserManager.Task.Supervisor]])
 
     ]
@@ -27,6 +28,8 @@ defmodule UserManager.Application do
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: UserManager.Supervisor]
-    Supervisor.start_link(children, opts)
+    {:ok, pid} = Supervisor.start_link(children, opts)
+    {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:create_user, :success, Process.whereis(UserManager.UserRepo))
+    {:ok, pid}
   end
 end

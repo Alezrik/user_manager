@@ -23,31 +23,31 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
 
   ## Examples:
     iex> name = Faker.Name.first_name <> Faker.Name.last_name
-    iex> {:ok, _user} = UserManager.UserManagerApi.create_user(name, "secretpassword", "here@there.com")
+    iex> {:notify, _user} = UserManager.UserManagerApi.create_user(name, "secretpassword", "here@there.com")
     iex> {:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserUserLookup.handle_events([{:authenticate_user, name, "secretpassword", :browser, nil}], self(), [])
     iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
     :validate_user
 
-    iex> {:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserUserLookup.handle_events([{:authenticate_user, "someothername", "secretpassword", :browser, nil}], self(), [])
-    iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
-    :user_not_found_error
+    iex>UserManager.Authenticate.AuthenticateUserUserLookup.handle_events([{:authenticate_user, "someothername", "secretpassword", :browser, nil}], self(), [])
+    {:noreply, [], []}
 """
   def handle_events(events, from, state) do
     process_events = events
     |> Flow.from_enumerable
-    |> Flow.map(fn e -> process_event(e) end)
+    |> Flow.flat_map(fn e -> process_event(e) end)
     |> Enum.to_list
      {:noreply, process_events, state}
   end
   defp process_event({:authenticate_user, name, password, source, notify}) do
     case GenServer.call(UserManager.UserRepo, {:get_user_id_for_authentication_name, name}) do
-      {:user_not_found} -> {:user_not_found_error, notify}
+      {:user_not_found} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authenticate, :user_not_found, %{}, notify)
+                           []
       {user_id} ->
         user = UserSchema
         |> where(id: ^user_id)
         |> Repo.one!
         |> Repo.preload(:user_profile)
-        {:validate_user, user, password, source, notify}
+        [{:validate_user, user, password, source, notify}]
     end
   end
 end

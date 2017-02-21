@@ -18,23 +18,25 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
 
   iex>name = Faker.Name.first_name <> Faker.Name.last_name
   iex>email = Faker.Internet.email
-  iex>{:ok, user} = UserManager.UserManagerApi.create_user(name, "secretpassword", email)
+  iex>{:notify, response} = UserManager.UserManagerApi.create_user(name, "secretpassword", email)
+  iex>user = Map.fetch!(response.response_parameters, "created_object")
   iex>{:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserValidation.handle_events([{:validate_user, user, "secretpassword", :browser, nil}], nil, [])
   iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
   :authenticate_user
 
   iex>name = Faker.Name.first_name <> Faker.Name.last_name
   iex>email = Faker.Internet.email
-  iex>{:ok, user} = UserManager.UserManagerApi.create_user(name, "secretpassword", email)
-  iex>{:noreply, response, _state} = UserManager.Authenticate.AuthenticateUserValidation.handle_events([{:validate_user, user, "secretpassworda", :browser, nil}], nil, [])
-  iex> Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
-  :authenticate_failure
+  iex>{:notify, response} = UserManager.UserManagerApi.create_user(name, "secretpassword", email)
+  iex>user = Map.fetch!(response.response_parameters, "created_object")
+  iex>UserManager.Authenticate.AuthenticateUserValidation.handle_events([{:validate_user, user, "secretpassworda", :browser, nil}], nil, [])
+  {:noreply, [], []}
+
 """
   def handle_events(events, from, state) do
     process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_user)
     |> Flow.from_enumerable
-    |> Flow.map(fn e -> validate_login_permission(e) end)
-    |> Flow.map(fn e -> process_event(e) end)
+    |> Flow.flat_map(fn e -> validate_login_permission(e) end)
+    |> Flow.flat_map(fn e -> process_event(e) end)
     |> Enum.to_list
     un_processed_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :validate_user)
     {:noreply, process_events ++ un_processed_events, state}
@@ -42,8 +44,9 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
   defp process_event({:validate_user, user, password, source, notify}) do
     encrypted_password = user.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("secretkey")
     case Bcrypt.checkpw(password, encrypted_password) do
-      true -> {:authenticate_user, user, source, notify}
-      false -> {:authenticate_failure, notify}
+      true -> [{:authenticate_user, user, source, notify}]
+      false -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authenticate, :authenticate_failure, %{}, notify)
+               []
     end
   end
   defp process_event({:authorization_failure, notify}) do
@@ -60,8 +63,9 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
       Enum.map(p.users, fn u -> u.id end) end)
     |> Enum.member?(user.id)
     case p do
-      false -> {:authorization_failure, notify}
-      true -> {:validate_user, user, password, source, notify}
+      false -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authenticate, :authorization_failure, %{}, notify)
+              []#{:authorization_failure, notify}
+      true -> [{:validate_user, user, password, source, notify}]
     end
   end
 

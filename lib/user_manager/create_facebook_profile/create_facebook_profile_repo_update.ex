@@ -10,29 +10,27 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileRepoUpdate do
         GenStage.start_link(__MODULE__, [], name: __MODULE__)
     end
     def init(stat) do
-        {:producer_consumer, [], subscribe_to: [UserManager.CreateFacebookProfile.CreateFacebookProfileGenerateServerToken]}
+        {:consumer, [], subscribe_to: [UserManager.CreateFacebookProfile.CreateFacebookProfileGenerateServerToken]}
     end
 
     @facebook_proxy Application.get_env(:user_manager, :facebook_proxy)
 
     def handle_events(events, from, state) do
-      process_events = events |> UserManager.WorkflowProcessing.get_process_events(:process_server_token)
+      process_events = events
       |> Flow.from_enumerable
       |> Flow.map(fn e -> process_event(e) end)
-      |> Flow.map(fn e -> verify_record(e) end)
+      |> Flow.flat_map(fn e -> verify_record(e) end)
       |> Flow.map(fn e -> write_record(e) end)
       |> Enum.to_list
-      unprocessed_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :process_server_token)
-      {:noreply, process_events ++ unprocessed_events, state}
-    end
-    def write_record({:validation_error, errors, user_id, notify}) do
-      {:validation_error, errors, user_id, notify}
+      {:noreply, [], state}
     end
     def write_record({:write_record, user_profile_changeset, token, expire_time, user_id, notify}) do
       case Repo.update(user_profile_changeset) do
-        {:error, changeset} -> {:repo_error, changeset, user_id, notify}
+        {:error, changeset} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_facebook_profile, :validation_error, UserManager.Notifications.NotificationMetadataHelper.build_changeset_validation_error(:user_profile, changeset), notify)#{:repo_error, changeset, user_id, notify}
+                                []
         {:ok, item} ->
-        {:facebook_create_success, token, expire_time, user_id, notify}
+        UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_facebook_profile, :success, %{"token" => token, "token_expire_time" => expire_time}, notify)
+        []
       end
     end
     def process_event({:process_server_token, token, expire_time , server_token, server_token_expire, user_id, notify}) do
@@ -56,8 +54,9 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileRepoUpdate do
       metadata = Map.merge(user.user_profile.authentication_metadata, facebook_data)
       user_profile_changeset = UserProfile.changeset(user.user_profile, %{"authentication_metadata" => metadata})
       case user_profile_changeset.valid? do
-        true -> {:write_record, user_profile_changeset, token, expire_time, user_id, notify}
-        false -> {:profile_validation_error, user_profile_changeset.errors, user_id, notify}
+        true -> [{:write_record, user_profile_changeset, token, expire_time, user_id, notify}]
+        false -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_facebook_profile, :validation_error, UserManager.Notifications.NotificationMetadataHelper.build_changeset_validation_error(:user_profile, user_profile_changeset), notify)
+        #{:profile_validation_error, user_profile_changeset.errors, user_id, notify}
       end
     end
 end

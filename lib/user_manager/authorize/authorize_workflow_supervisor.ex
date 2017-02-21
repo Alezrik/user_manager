@@ -10,9 +10,7 @@ defmodule UserManager.Authorize.AuthorizeWorkflowSupervisor.Supervisor do
     children = [
       worker(UserManager.Authorize.AuthorizeUserWorkflowProducer, [:ok]),
       worker(UserManager.Authorize.AuthorizeUserValidateToken, [:ok]),
-      worker(UserManager.Authorize.AuthorizeUserValidatePermissions, [:ok]),
-      worker(UserManager.Authorize.AuthorizeUserNotificationFormatter, [:ok]),
-      worker(UserManager.Authorize.AuthorizeUserNotification, [:ok])
+      worker(UserManager.Authorize.AuthorizeUserValidatePermissions, [:ok])
     ]
     supervise(children, strategy: :one_for_one)
   end

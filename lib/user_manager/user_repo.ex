@@ -5,15 +5,22 @@ defmodule UserManager.UserRepo do
   alias UserManager.Schemas.UserSchema
   alias UserManager.Repo
   def start_link(state, opts) do
-    GenServer.start_link(__MODULE__, state, opts)
+    {:ok, pid} = GenServer.start_link(__MODULE__, state, opts)
+    {:ok, pid}
   end
 
   def init(_opts) do
+    #Process.send_after(self(), :register, 1_000)
     users = UserSchema
     |> Repo.all
     |> Enum.map(fn r -> UserManager.Struct.User.load_user(r.id) end)
     {:ok, users}
   end
+  def handle_info({:notify, notification}, state) do
+     {:reply, event, update_state} = handle_call({:create_user_notify, notification}, nil, state)
+    {:noreply, update_state}
+  end
+
   def handle_call({:validate_credential_name_email, name, email}, _from, state) do
     response = Enum.filter(state, fn u ->
       {_, n, _, e} = u
@@ -48,8 +55,14 @@ defmodule UserManager.UserRepo do
        {:reply, {u.user_schema_id}, state}
      end
   end
-  def handle_cast({:create_user_notify, user_id}, state) do
-    {:noreply, [UserManager.Struct.User.load_user(user_id) | Enum.filter(state, fn s -> s.user_schema_id != user_id end)]}
+  def handle_call({:create_user_notify, user_id}, _from, state) when is_number(user_id) do
+      {:noreply, [UserManager.Struct.User.load_user(user_id) | Enum.filter(state, fn s -> s.user_schema_id != user_id end)]}
+    end
+  def handle_call({:create_user_notify, user_id}, _from, state) do
+    metadata = user_id.response_parameters
+    user = Map.fetch!(metadata, "created_object")
+    add_user = UserManager.Struct.User.load_user(user.id)
+    {:reply, add_user, [add_user | Enum.filter(state, fn s -> s.user_schema_id != user.id end)]}
   end
   def handle_cast(_msg, state) do
     {:noreply, state}

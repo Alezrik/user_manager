@@ -2,7 +2,9 @@ defmodule UserManager.Extern.ExternalProxySupervisor.Supervisor do
   @moduledoc false
   use Supervisor
   def start_link(arg) do
-    Supervisor.start_link(__MODULE__, arg)
+    {:ok, pid} = Supervisor.start_link(__MODULE__, arg)
+    Process.register(pid, UserManager.Extern.ExternalProxySupervisor.Supervisor)
+    {:ok, pid}
   end
 
   def init(arg) do

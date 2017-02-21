@@ -7,7 +7,14 @@ defmodule CreateUserWorkflowTest do
   import Ecto.Changeset
   require Logger
   test "create user workflow" do
-     {:ok, user} = UserManager.UserManagerApi.create_user(Faker.Name.first_name <> Faker.Name.last_name, "fdsafdsfasfdsa", Faker.Internet.email)
-     {:error, :create_user_validation_error, error_list} =  UserManager.UserManagerApi.create_user(Faker.Name.first_name <> Faker.Name.last_name, "fdsa", Faker.Internet.email)
+     {:notify, response} = UserManager.UserManagerApi.create_user(Faker.Name.first_name <> Faker.Name.last_name, "fdsafdsfasfdsa", Faker.Internet.email)
+     assert response.notification_type == :success
+     assert Map.fetch!(response.response_parameters, "created_type") == :user_schema
+     user = Map.fetch!(response.response_parameters, "created_object")
+     assert user.id > 0
+   end
+   test "create invalid user workflow" do
+     {:notify, error_response} =  UserManager.UserManagerApi.create_user(Faker.Name.first_name <> Faker.Name.last_name, "fdsa", Faker.Internet.email)
+     assert error_response.notification_type == :validation_error
    end
 end

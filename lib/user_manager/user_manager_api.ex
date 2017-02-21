@@ -13,10 +13,10 @@ defmodule UserManager.UserManagerApi do
     new_user_default_permissions: ###SomeGuardianPermissionListHere###
 
 """
-  @spec create_user(String.t, String.t, String.t) :: {atom, UserManager.User.t} | {atom, atom, String.t}
   def create_user(name, password, email) do
       UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
-      GenServer.cast(UserManager.CreateUser.CreateUserWorkflowProducer, {:create_user, name, password, email, self()})
+      notify = %UserManager.Struct.Notification{destination_pid: self()}
+      GenServer.cast(UserManager.CreateUser.CreateUserWorkflowProducer, {:create_user, name, password, email, notify})
       receive do
         some_msg -> some_msg
       end
@@ -27,23 +27,22 @@ defmodule UserManager.UserManagerApi do
   Validates a name and password against a UserProfile, if successful returns a token based upon the
   Guardian token_type 'authentication_source'
 """
-  @spec authenticate_user(String.t, String.t, atom) :: {atom, String.t} | {atom, atom, String.t} | {atom, atom}
   def authenticate_user(name, password, authentication_source \\ :browser) do
     UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
-      GenServer.cast(UserManager.Authenticate.AuthenticateUserWorkflowProducer, {:authenticate_user, name, password, authentication_source, self()})
+      notify = %UserManager.Struct.Notification{destination_pid: self()}
+      GenServer.cast(UserManager.Authenticate.AuthenticateUserWorkflowProducer, {:authenticate_user, name, password, authentication_source, notify})
       receive do
         some_msg -> some_msg
       end
     end) |> Task.await(Application.get_env(:user_manager, :syncronous_api_timeout))
   end
-  @spec identify_user(String.t) :: {atom, UserManager.User.t} | {atom, atom} | {atom, atom, String.t}
-
   @doc"""
   Looks up a user from a token
 """
   def identify_user(token) do
     UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
-      GenServer.cast(UserManager.Identify.IdentifyUserProducer, {:identify_user, token, self()})
+      notify = %UserManager.Struct.Notification{destination_pid: self()}
+      GenServer.cast(UserManager.Identify.IdentifyUserProducer, {:identify_user, token, notify})
       receive do
         some_msg -> some_msg
       end
@@ -54,19 +53,19 @@ defmodule UserManager.UserManagerApi do
   require_all is used to specify if all permissions are required or only a single_permission would be required
   to meet the requirement.
   """
-  @spec authorize_claims(String.t, Enum.t, bool) :: {atom} | {atom, atom} | {atom, atom, String.t}
   def authorize_claims(token, permission_list, require_all \\ true) do
     UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
-      GenServer.cast(UserManager.Authorize.AuthorizeUserWorkflowProducer, {:authorize_token, token, permission_list, require_all, self()})
+      notify = %UserManager.Struct.Notification{destination_pid: self()}
+      GenServer.cast(UserManager.Authorize.AuthorizeUserWorkflowProducer, {:authorize_token, token, permission_list, require_all, notify})
       receive do
         some_msg -> some_msg
       end
     end) |> Task.await(Application.get_env(:user_manager, :syncronous_api_timeout))
   end
-  @spec create_facebook_profile(Integer.t, String.t) :: Tuple.t
   def create_facebook_profile(user_id, facebook_code_token) do
     UserManager.Task.Supervisor |> Task.Supervisor.async(fn ->
-      GenServer.cast(UserManager.CreateFacebookProfile.CreateFacebookProfileProducer, {:create_facebook_profile, facebook_code_token, user_id, self()})
+      notify = %UserManager.Struct.Notification{destination_pid: self()}
+      GenServer.cast(UserManager.CreateFacebookProfile.CreateFacebookProfileProducer, {:create_facebook_profile, facebook_code_token, user_id, notify})
       receive do
         some_msg -> some_msg
       end

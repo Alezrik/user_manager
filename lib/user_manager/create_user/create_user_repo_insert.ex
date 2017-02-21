@@ -22,17 +22,17 @@ defmodule UserManager.CreateUser.CreateUserRepoInsert do
      :insert_permissions
 """
   def handle_events(events, from, state) do
-    process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:insert_user)
+    process_events = events
     |> Flow.from_enumerable
-    |> Flow.map(fn e -> process_event(e) end)
+    |> Flow.flat_map(fn e -> process_event(e) end)
     |> Enum.to_list
-    un_processed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :insert_user)
-    {:noreply, process_events ++ un_processed_events, state}
+    {:noreply, process_events, state}
   end
   defp process_event({:insert_user, user_changeset, notify}) do
     case Repo.insert(user_changeset) do
-      {:ok, user} -> {:insert_permissions, user, notify}
-      {:error, changeset} -> {:insert_error, changeset.errors, notify}
+      {:ok, user} -> [{:insert_permissions, user, notify}]
+      {:error, changeset} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_user, :insert_error, UserManager.Notifications.NotificationMetadataHelper.build_changeset_validation_error(:user, changeset), notify)
+                              []
     end
   end
 end

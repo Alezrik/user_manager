@@ -12,7 +12,7 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
       GenStage.start_link(__MODULE__, [], name: __MODULE__)
   end
   def init(stat) do
-    {:producer_consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserRepoInsert]}
+    {:consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserRepoInsert]}
   end
   @doc"""
 
@@ -29,20 +29,18 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
 
 """
   def handle_events(events, from, state) do
-    process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:insert_permissions)
+     process_events = events
      |> Flow.from_enumerable
      |> Flow.map(fn e -> process_insert_permissions(e) end)
-     |> Flow.map(fn e -> process_insert_results(e) end)
+     |> Flow.flat_map(fn e -> process_insert_results(e) end)
      |> Enum.to_list
-     unprocessed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :insert_permissions)
-     {:noreply, process_events ++ unprocessed_events, state}
+     {:noreply, process_events, state}
   end
   defp process_insert_results({{:insert_permissions, user, notify}, event_permissions_inserts}) do
     compile_update_result(event_permissions_inserts, user, notify)
   end
   defp process_insert_permissions({:insert_permissions, user, notify}) do
     create_permissions = GenServer.call(UserManager.PermissionRepo, {:get_default_user_create_permission_ids})
-    Logger.debug "create permission ids: #{inspect create_permissions}"
     event_permissions_inserts = Stream.map(create_permissions, fn p_id ->
       permission = Permission
       |> where(id: ^p_id)
@@ -61,11 +59,23 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
      end
   end
   defp compile_update_result(event_permissions_inserts, user, notify) do
-    Enum.reduce_while(event_permissions_inserts, {:ok, notify, user}, fn p, acc ->
-      case p do
-        {:ok, _} -> {:cont, acc}
-        {:update_error, changeset} -> {:halt, {:update_permission_error, notify, changeset.errors}}
-      end
-     end)
+    case Enum.reduce_while(event_permissions_inserts, {:ok, notify, user}, fn p, acc ->
+       continue_reduce(p, acc, notify)
+     end) do
+       {:ok, notify, user} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_user, :success,
+                                                                UserManager.Notifications.NotificationMetadataHelper.build_create_user_success(user),
+                                                                notify)
+                                                                []#[{:ok, notify, user}]
+       {:update_permission_error, notify, changeset} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_user, :update_error,
+                                                        UserManager.Notifications.NotificationMetadataHelper.build_changeset_validation_error(:user, changeset),
+                                                        notify)
+                                                        []
+     end
+  end
+  defp continue_reduce(p, acc, notify) do
+    case p do
+      {:ok, _} -> {:cont, acc}
+      {:update_error, changeset} -> {:halt, {:update_permission_error, notify, changeset}}
+    end
   end
 end

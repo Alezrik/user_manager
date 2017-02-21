@@ -12,9 +12,7 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileSupervisor.Supe
       worker(UserManager.CreateFacebookProfile.CreateFacebookProfileProducer, [:ok]),
       worker(UserManager.CreateFacebookProfile.CreateFacebookProfileValidateCodeToken, [:ok]),
       worker(UserManager.CreateFacebookProfile.CreateFacebookProfileGenerateServerToken, [:ok]),
-      worker(UserManager.CreateFacebookProfile.CreateFacebookProfileRepoUpdate, [:ok]),
-      worker(UserManager.CreateFacebookProfile.CreateFacebookProfileNotificationFormatter, [:ok]),
-      worker(UserManager.CreateFacebookProfile.CreateFacebookProfileNotification, [:ok])
+      worker(UserManager.CreateFacebookProfile.CreateFacebookProfileRepoUpdate, [:ok])
     ]
     supervise(children, strategy: :one_for_one)
   end

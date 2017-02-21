@@ -8,37 +8,37 @@ defmodule UserManager.Identify.IdentifyUserDeserializer do
           GenStage.start_link(__MODULE__, [], name: __MODULE__)
       end
       def init(stat) do
-        {:producer_consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserValidateToken]}
+        {:consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserValidateToken]}
       end
       @doc"""
       get user from the decoded token
 
       ## Examples
-        iex>{:ok, usr} = UserManager.UserManagerApi.create_user(Faker.Name.first_name <> Faker.Name.last_name, "testpassword", Faker.Internet.email)
+        iex>{:notify, response} = UserManager.UserManagerApi.create_user(Faker.Name.first_name <> Faker.Name.last_name, "testpassword", Faker.Internet.email)
+        iex>metadata = response.response_parameters
+        iex>usr = Map.fetch!(metadata, "created_object")
         iex>usr_id = "User:" <> Integer.to_string(usr.id)
-        iex>{:noreply, response, _} = UserManager.Identify.IdentifyUserDeserializer.handle_events( [{:deserialize_user, %{"sub"=>usr_id}, nil}], nil, [])
-        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
-        :ok
+        iex>UserManager.Identify.IdentifyUserDeserializer.handle_events( [{:deserialize_user, %{"sub"=>usr_id}, nil}], nil, [])
+        {:noreply, [], []}
 
-        iex>{:noreply, response, _} = UserManager.Identify.IdentifyUserDeserializer.handle_events( [{:deserialize_user, %{"sub"=>"fdsafdsa"}, nil}], nil, [])
-        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 0)
-        :error
-        iex>Enum.at(Tuple.to_list(Enum.at(response, 0)), 1)
-        :user_deserialize_error
+        iex>UserManager.Identify.IdentifyUserDeserializer.handle_events( [{:deserialize_user, %{"sub"=>"fdsafdsa"}, nil}], nil, [])
+        {:noreply, [], []}
+
 """
       def handle_events(events, from, state) do
-        process_events =  events |> UserManager.WorkflowProcessing.get_process_events(:deserialize_user)
+        process_events =  events
         |> Flow.from_enumerable
-        |> Flow.map(fn e -> process_event(e) end)
+        |> Flow.flat_map(fn e -> process_event(e) end)
         |> Enum.to_list
-        un_processed_events =  UserManager.WorkflowProcessing.get_unprocessed_events(events, :deserialize_user)
-        {:noreply, process_events ++ un_processed_events, state}
+        {:noreply, [], state}
       end
 
       defp process_event({:deserialize_user, data, notify}) do
         case UserManager.GuardianSerializer.from_token(Map.fetch!(data, "sub")) do
-              {:ok, user} -> {:ok, user, notify}
-              other -> {:error, :user_deserialize_error, notify}
+              {:ok, user} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:identify_user, :success, %{"user" => user}, notify)
+                            []
+              other -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:identify_user, :user_deserialize_error, %{}, notify)
+                       []
         end
       end
 end
