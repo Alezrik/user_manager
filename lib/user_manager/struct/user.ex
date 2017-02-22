@@ -32,7 +32,7 @@ defmodule UserManager.Struct.User do
               ]
               case Map.fetch(basic_user_record.user_profile.authentication_metadata, "facebook") do
                 :error -> credentials
-                {:ok, value} -> credentials ++ [{:facebook, basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("name"),
+                {:ok, _value} -> credentials ++ [{:facebook, basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("name"),
                                                 basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("id"),
                                                 basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("email"),
                                                 basic_user_record.user_profile.authentication_metadata |> Map.fetch!("facebook") |> Map.fetch!("token"),

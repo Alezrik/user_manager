@@ -2,16 +2,14 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
   @moduledoc false
   use GenStage
   alias UserManager.Schemas.Permission
-  alias UserManager.Schemas.PermissionGroup
   alias UserManager.Repo
   import Ecto.Query
   import Ecto.Changeset
   require Logger
-   def start_link(setup) do
-     name = "#{__MODULE__}#{setup}"
+   def start_link(_) do
       GenStage.start_link(__MODULE__, [], name: __MODULE__)
   end
-  def init(stat) do
+  def init(_) do
     {:consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserRepoInsert]}
   end
   @doc"""
@@ -28,7 +26,7 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
     :ok
 
 """
-  def handle_events(events, from, state) do
+  def handle_events(events, _from, state) do
      process_events = events
      |> Flow.from_enumerable
      |> Flow.map(fn e -> process_insert_permissions(e) end)

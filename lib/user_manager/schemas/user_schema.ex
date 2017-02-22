@@ -4,7 +4,6 @@ defmodule UserManager.Schemas.UserSchema do
 """
   use Ecto.Schema
   import Ecto.Changeset
-  alias Comeonin.Bcrypt
   schema "users" do
     has_one :user_profile, UserManager.Schemas.UserProfile
     many_to_many :permissions, UserManager.Schemas.Permission, join_through: "permissions_to_users", on_replace: :delete

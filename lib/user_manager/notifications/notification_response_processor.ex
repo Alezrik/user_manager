@@ -28,7 +28,7 @@ defmodule UserManager.Notifications.NotificationResponseProcessor do
     |> Enum.count
     case validate > 0 do
       true ->
-        process_notify = UserManager.Notifications.NotificationRequestInitiator.get_subscribers(workflow, notification_code)
+        _process_notify = UserManager.Notifications.NotificationRequestInitiator.get_subscribers(workflow, notification_code)
         |> Flow.from_enumerable()
         |> Flow.map(fn subscribers -> process_subscriber_notification(subscribers, notification_metadata) end)
         |> Enum.to_list
@@ -45,11 +45,11 @@ defmodule UserManager.Notifications.NotificationResponseProcessor do
   |> Enum.count
   case validate > 0 do
     true ->
-      process_notify = UserManager.Notifications.NotificationRequestInitiator.get_subscribers(workflow, notification_code)
+      _process_notify = UserManager.Notifications.NotificationRequestInitiator.get_subscribers(workflow, notification_code)
       |> Flow.from_enumerable()
       |> Flow.map(fn subscribers -> process_subscriber_notification(subscribers, notification_metadata) end)
       |> Enum.to_list
-      resp = process_notify_request(notification_metadata, workflow, notification_code, notify)
+      _resp = process_notify_request(notification_metadata, workflow, notification_code, notify)
     false -> Logger.error "Invalid notification request for #{inspect workflow} -> #{inspect notification_code}, validate UserManager.Notifications.NotificationRequestInitiator.get_workflow_and_codes_map()"
   end
   {:noreply, state}
@@ -63,7 +63,7 @@ defmodule UserManager.Notifications.NotificationResponseProcessor do
     response = build_response(workflow, workflow_response_code, notification_metadata)
     send_notification(response, response_pid)
   end
-  defp send_notification(response, pid) when is_nil(pid) do
+  defp send_notification(_, pid) when is_nil(pid) do
 
   end
   defp send_notification(response, pid) do

@@ -2,10 +2,10 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileGenerateServerT
   @moduledoc false
   use GenStage
   require Logger
-  def start_link(setup) do
+  def start_link(_) do
       GenStage.start_link(__MODULE__, [], name: __MODULE__)
   end
-  def init(stat) do
+  def init(_) do
       {:producer_consumer, [], subscribe_to: [UserManager.CreateFacebookProfile.CreateFacebookProfileValidateCodeToken]}
   end
 
@@ -25,7 +25,7 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileGenerateServerT
    {"Date", "Tue, 14 Feb 2017 09:24:51 GMT"}, {"Transfer-Encoding", "chunked"}, {"Connection", "keep-alive"}], status_code: 200}
 
 """
-  def handle_events(events, from, state) do
+  def handle_events(events, _from, _state) do
     process_events = events
     |> Flow.from_enumerable
     |> Flow.flat_map(fn e -> process_event(e) end)

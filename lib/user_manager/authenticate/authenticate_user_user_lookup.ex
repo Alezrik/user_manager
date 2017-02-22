@@ -2,14 +2,13 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
   @moduledoc false
   use GenStage
   require Logger
-  alias UserManager.Schemas.UserProfile
   alias UserManager.Schemas.UserSchema
   alias UserManager.Repo
   import Ecto.Query
-  def start_link(setup) do
+  def start_link(_) do
     GenStage.start_link(__MODULE__, [], [name: __MODULE__])
   end
-  def init(state) do
+  def init(_) do
     {:producer_consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserWorkflowProducer]}
   end
   @doc"""
@@ -31,7 +30,7 @@ defmodule UserManager.Authenticate.AuthenticateUserUserLookup do
     iex>UserManager.Authenticate.AuthenticateUserUserLookup.handle_events([{:authenticate_user, "someothername", "secretpassword", :browser, nil}], self(), [])
     {:noreply, [], []}
 """
-  def handle_events(events, from, state) do
+  def handle_events(events, _from, state) do
     process_events = events
     |> Flow.from_enumerable
     |> Flow.flat_map(fn e -> process_event(e) end)

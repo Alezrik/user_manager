@@ -2,15 +2,14 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
   @moduledoc false
   use GenStage
   require Logger
-  alias UserManager.Schemas.User
   alias UserManager.Repo
   alias UserManager.Schemas.Permission
   import Ecto.Query
   alias Comeonin.Bcrypt
-  def start_link(setup) do
+  def start_link(_) do
     GenStage.start_link(__MODULE__, [], [name: __MODULE__])
   end
-  def init(state) do
+  def init(_) do
     {:producer_consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserUserLookup]}
   end
   @doc"""
@@ -32,7 +31,7 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
   {:noreply, [], []}
 
 """
-  def handle_events(events, from, state) do
+  def handle_events(events, _from, state) do
     process_events = events
     |> Flow.from_enumerable
     |> Flow.flat_map(fn e -> validate_login_permission(e) end)

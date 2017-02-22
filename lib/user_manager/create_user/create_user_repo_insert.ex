@@ -3,11 +3,10 @@ defmodule UserManager.CreateUser.CreateUserRepoInsert do
   use GenStage
   alias UserManager.Repo
   require Logger
-   def start_link(setup) do
-         name = "#{__MODULE__}#{setup}"
+   def start_link(_) do
          GenStage.start_link(__MODULE__, [], name: __MODULE__)
      end
-  def init(stat) do
+  def init(_) do
 
     {:producer_consumer, [], subscribe_to: [UserManager.CreateUser.CreateUserDataValidator]}
   end
@@ -21,7 +20,7 @@ defmodule UserManager.CreateUser.CreateUserRepoInsert do
      iex>Enum.at(Tuple.to_list(Enum.at(response,0)),0)
      :insert_permissions
 """
-  def handle_events(events, from, state) do
+  def handle_events(events, _from, state) do
     process_events = events
     |> Flow.from_enumerable
     |> Flow.flat_map(fn e -> process_event(e) end)

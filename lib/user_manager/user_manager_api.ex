@@ -74,4 +74,7 @@ defmodule UserManager.UserManagerApi do
   def delete_user(user_id) do
     UserManager.UserRepo.delete_user(user_id)
   end
+  def update_user_password(user_id, password) do
+    UserManager.UserRepo.update_user_password(user_id, password)
+  end
 end

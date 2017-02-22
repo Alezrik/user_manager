@@ -11,7 +11,7 @@ config :user_manager, UserManager.Repo,
   port: "5432"
 
 config :user_manager,
-  syncronous_api_timeout: 1000,
+  syncronous_api_timeout: 5_000,
   facebook_proxy: FakeFacebookProxy,
   facebook_profile_timeout: 5_000
 

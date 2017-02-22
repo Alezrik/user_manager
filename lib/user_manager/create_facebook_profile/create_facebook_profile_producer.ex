@@ -2,17 +2,17 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileProducer do
   @moduledoc false
   use GenStage
   require Logger
-  def start_link(setup) do
+  def start_link(_) do
     GenStage.start_link(__MODULE__, [], [name: __MODULE__])
   end
-  def init(state) do
+  def init(_) do
     {:producer, {[], 0}}
   end
   def handle_cast({:create_facebook_profile, code_token, user_id, notify}, {queue, demand}) do
     {events_to_send, queued_events} = process_events(demand, queue, {:create_facebook_profile, code_token, user_id, notify})
     {:noreply, events_to_send, queued_events}
   end
-  def handle_demand(demand, {queue, d}) when demand > 0 do
+  def handle_demand(demand, {queue, _}) when demand > 0 do
     {send_events, new_state} = process_events(demand, queue, nil)
     {:noreply, send_events, new_state}
   end

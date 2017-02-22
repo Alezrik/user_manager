@@ -1,12 +1,11 @@
 defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileValidateCodeToken do
   @moduledoc false
   use GenStage
-  alias UserManager.Schemas.User
   require Logger
-  def start_link(setup) do
+  def start_link(_) do
      GenStage.start_link(__MODULE__, [], name: __MODULE__)
   end
-  def init(stat) do
+  def init(_) do
     {:producer_consumer, [], subscribe_to: [UserManager.CreateFacebookProfile.CreateFacebookProfileProducer]}
   end
 
@@ -27,7 +26,7 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileValidateCodeTok
     {"x-fb-rev", "2828561"}, {"Vary", "Accept-Encoding"}, {"X-FB-Debug", "Hg0+TaDInvdBLTvHAhTJ3hsuuyjeA//nmrchMjHd0y2j789EjeMb++tKuWYFAzM3RerxXvAOMVQoeF2yBdw7VA=="},
     {"Date", "Mon, 13 Feb 2017 08:02:30 GMT"}, {"Transfer-Encoding", "chunked"}, {"Connection", "keep-alive"}], status_code: 200}
 """
-  def handle_events(events, from, state) do
+  def handle_events(events, _from, state) do
     process_events = events
     |> Flow.from_enumerable()
     |> Flow.flat_map(fn e -> process_event(e) end)

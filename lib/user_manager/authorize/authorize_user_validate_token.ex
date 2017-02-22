@@ -1,12 +1,11 @@
 defmodule UserManager.Authorize.AuthorizeUserValidateToken do
   @moduledoc false
   use GenStage
-  alias UserManager.Schemas.User
   require Logger
-   def start_link(setup) do
+   def start_link(_) do
       GenStage.start_link(__MODULE__, [], name: __MODULE__)
   end
-  def init(stat) do
+  def init(_) do
     {:producer_consumer, [], subscribe_to: [UserManager.Authorize.AuthorizeUserWorkflowProducer]}
   end
   @doc"""
@@ -34,7 +33,7 @@ defmodule UserManager.Authorize.AuthorizeUserValidateToken do
       {:noreply, [], []}
 
 """
-  def handle_events(events, from, state) do
+  def handle_events(events, _from, state) do
     process_events = events
     |> Flow.from_enumerable
     |> Flow.flat_map(fn e -> process_event(e) end)

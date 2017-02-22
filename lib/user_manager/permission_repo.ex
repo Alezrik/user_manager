@@ -2,7 +2,6 @@ defmodule UserManager.PermissionRepo do
   @moduledoc false
   use GenServer
   alias UserManager.Schemas.Permission
-  alias UserManager.Schemas.PermissionGroup
   alias UserManager.Repo
   require Logger
   def start_link(state, opts) do

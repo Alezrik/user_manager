@@ -1,13 +1,11 @@
 defmodule UserManager.Identify.IdentifyUserValidateToken do
   @moduledoc false
     use GenStage
-    alias UserManager.User
     require Logger
-     def start_link(setup) do
-        name = "#{__MODULE__}#{setup}"
+     def start_link(_) do
         GenStage.start_link(__MODULE__, [], name: __MODULE__)
     end
-    def init(stat) do
+    def init(_) do
       {:producer_consumer, [], subscribe_to: [UserManager.Identify.IdentifyUserProducer]}
     end
     @doc"""
@@ -31,7 +29,7 @@ defmodule UserManager.Identify.IdentifyUserValidateToken do
       iex>UserManager.Identify.IdentifyUserValidateToken.handle_events([{:identify_user, token, nil}], nil, [])
       {:noreply, [], []}
 """
-    def handle_events(events, from, state) do
+    def handle_events(events, _from, state) do
       process_events = events
       |> Flow.from_enumerable
       |> Flow.flat_map(fn e  -> process_event(e) end)

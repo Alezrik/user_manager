@@ -88,7 +88,7 @@ defmodule UserManager.Schemas.UserProfile do
   defp process_facebook_field_exists(changeset, field, facebook_map, field_name) do
     case Map.fetch(facebook_map, field_name) do
       :error -> add_error(changeset, field, "facebook is missing #{field_name}")
-      {_, v} -> changeset
+      {_, _v} -> changeset
       end
   end
   defp validate_password_or_encrypted_exists(changeset, field, password_field, encrypted_password_field) do
@@ -97,7 +97,7 @@ defmodule UserManager.Schemas.UserProfile do
       {_, nil} -> add_error(changeset, field, "credentials do not exist!")
       {_, ch} -> case ch |> Map.get("credentials", %{}) |> Map.get(password_field, encrypted_password_field) do
         nil -> add_error(changeset, field, "password does not exist!")
-        item -> changeset
+        _item -> changeset
       end
     end
   end
@@ -108,7 +108,7 @@ defmodule UserManager.Schemas.UserProfile do
       {_, ch} -> case ch |> Map.get("credentials", %{}) |> Map.get(raw_password, "") do
         "" -> changeset
         passwd ->
-          new_field = updated_credentials = ch |> Map.fetch!("credentials") |> Map.put(destination_encrypt, Bcrypt.hashpwsalt(passwd)) |> Map.delete(raw_password)
+          new_field = ch |> Map.fetch!("credentials") |> Map.put(destination_encrypt, Bcrypt.hashpwsalt(passwd)) |> Map.delete(raw_password)
           new_credentials =  Map.put(ch, "credentials", new_field)
           put_change(changeset, field, new_credentials)
       end
@@ -121,7 +121,7 @@ defmodule UserManager.Schemas.UserProfile do
       {_, credentials} ->
           case Map.get(credentials, "credentials", %{}) do
         i when map_size(i) < 1 -> add_error(changeset, field, "credentials do not exist")
-        other -> changeset
+        _other -> changeset
       end
     end
   end
@@ -131,7 +131,7 @@ defmodule UserManager.Schemas.UserProfile do
       {_, nil} -> add_error(changeset, field, "#{credentials_field} does not exist")
       {_, ch} -> case ch |> Map.get("credentials", %{}) |> Map.fetch(credentials_field) do
         :error -> add_error(changeset, field, "#{credentials_field} does not exist")
-        success -> changeset
+        _success -> changeset
       end
     end
   end

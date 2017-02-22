@@ -31,6 +31,7 @@ defmodule UserManager.Application do
     {:ok, pid} = Supervisor.start_link(children, opts)
     {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:create_user, :success, Process.whereis(UserManager.UserRepo))
     {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:user_crud, :delete, Process.whereis(UserManager.UserRepo))
+    {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:user_crud, :update, Process.whereis(UserManager.UserRepo))
     {:ok, pid}
   end
 end

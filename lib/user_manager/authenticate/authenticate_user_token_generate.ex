@@ -2,13 +2,11 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
   @moduledoc false
    use GenStage
     require Logger
-    alias UserManager.User
     alias UserManager.Repo
-    import Ecto.Query
-    def start_link(setup) do
+    def start_link(_) do
       GenStage.start_link(__MODULE__, [], [name: __MODULE__])
     end
-    def init(state) do
+    def init(_) do
       {:consumer, [], subscribe_to: [UserManager.Authenticate.AuthenticateUserValidation]}
     end
     @doc"""
@@ -22,8 +20,8 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
       iex>UserManager.Authenticate.AuthenticateUserTokenGenerate.handle_events([{:authenticate_user, user, :browser, nil}], nil, [])
       {:noreply, [], []}
 """
-    def handle_events(events, from, state) do
-        process_events = events
+    def handle_events(events, _from, state) do
+        _process_events = events
         |> Flow.from_enumerable
         |> Flow.map(fn e -> process_event(e) end)
         |> Enum.to_list
@@ -39,7 +37,7 @@ defmodule UserManager.Authenticate.AuthenticateUserTokenGenerate do
       u = Repo.preload(user, :permissions)
       permissions = group_permissions(u.permissions)
       case Guardian.encode_and_sign(u, source, %{"perms" => permissions}) do
-        {:ok, jtw, data} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authenticate, :success, %{"authenticate_token" => jtw}, notify)#{:ok, notify, jtw}
+        {:ok, jtw, _} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authenticate, :success, %{"authenticate_token" => jtw}, notify)#{:ok, notify, jtw}
         {:error, :token_storage_failure} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authenticate, :token_storage_failure, %{}, notify)#{:token_storage_failure, notify}
         {:error, reason} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authenticate, :token_error, %{"token_error" => reason}, notify)#{:token_error, notify, reason}
       end

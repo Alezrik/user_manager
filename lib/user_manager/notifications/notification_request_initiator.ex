@@ -74,7 +74,7 @@ defmodule UserManager.Notifications.NotificationRequestInitiator do
      true -> process_new_sub({:notify_sub, workflow, workflow_response_code, response_pid})
     end
   end
-  defp process_new_sub({:notify_sub, workflow, workflow_response_code, response_pid}) when is_nil(response_pid) do {:error, :null_pid} end
+  defp process_new_sub({:notify_sub, _, _, response_pid}) when is_nil(response_pid) do {:error, :null_pid} end
   defp process_new_sub({:notify_sub, workflow, workflow_response_code, response_pid}) do
     case Process.alive?(response_pid) do
       false -> {:error, :invalid_pid}
