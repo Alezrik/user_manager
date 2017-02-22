@@ -33,13 +33,12 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
 
 """
   def handle_events(events, from, state) do
-    process_events = events |> UserManager.WorkflowProcessing.get_process_events(:validate_user)
+    process_events = events
     |> Flow.from_enumerable
     |> Flow.flat_map(fn e -> validate_login_permission(e) end)
     |> Flow.flat_map(fn e -> process_event(e) end)
     |> Enum.to_list
-    un_processed_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :validate_user)
-    {:noreply, process_events ++ un_processed_events, state}
+    {:noreply, process_events, state}
   end
   defp process_event({:validate_user, user, password, source, notify}) do
     encrypted_password = user.user_profile.authentication_metadata |> Map.fetch!("credentials") |> Map.fetch!("secretkey")
@@ -48,9 +47,6 @@ defmodule UserManager.Authenticate.AuthenticateUserValidation do
       false -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authenticate, :authenticate_failure, %{}, notify)
                []
     end
-  end
-  defp process_event({:authorization_failure, notify}) do
-    {:authorization_failure, notify}
   end
   defp validate_login_permission({:validate_user, user, password, source, notify}) do
     [permission_id] = GenServer.call(UserManager.PermissionRepo, {:get_permission_id_by_group_name_permission_name, :authenticate, :credential})

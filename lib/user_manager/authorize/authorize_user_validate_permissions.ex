@@ -46,7 +46,7 @@ defmodule UserManager.Authorize.AuthorizeUserValidatePermissions do
           {:noreply, [], []}
 """
         def handle_events(events, from, state) do
-          process_events = events #|> UserManager.WorkflowProcessing.get_process_events(:validate_permissions)
+          process_events = events
           |> Flow.from_enumerable
           |> Flow.flat_map(fn e -> process_event(e) end)
           |> Enum.to_list
@@ -61,9 +61,9 @@ defmodule UserManager.Authorize.AuthorizeUserValidatePermissions do
            end)
            case permission_results do
              {true} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authorize, :success, %{}, notify)
-                        []#{:ok, notify}
+                        []
              {false} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:authorize, :unauthorized, %{}, notify)
-                        []#{:error, :unauthorized, notify}
+                        []
            end
         end
         def check_permission(true, true) do

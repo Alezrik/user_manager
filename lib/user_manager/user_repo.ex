@@ -21,16 +21,6 @@ defmodule UserManager.UserRepo do
     {:noreply, update_state}
   end
 
-  def handle_call({:validate_credential_name_email, name, email}, _from, state) do
-    response = Enum.filter(state, fn u ->
-      {_, n, _, e} = u
-      (n == name) || (e == email)
-     end)
-     case Enum.count(response) > 0 do
-       false -> {:reply, :ok, state}
-       true -> {:reply, :duplicate, state}
-     end
-  end
   def handle_call({:get_profile_id_for_user_id, user_id}, _from, state) do
     response = state |> Enum.filter(fn u ->
       u.user_schema_id == user_id

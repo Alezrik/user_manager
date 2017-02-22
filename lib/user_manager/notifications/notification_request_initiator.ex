@@ -25,12 +25,12 @@ defmodule UserManager.Notifications.NotificationRequestInitiator do
   * workflow_response_code - the workfow code to subscibe to
 
   ## Examples
-    iex>{:ok, response} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:create_user, :test, self())
+    iex>{:ok, response} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:create_user, :validation_error, self())
     iex>{:notify_sub, w, tag, _} = response
     iex>w
     :create_user
     iex>tag
-    :test
+    :validation_error
 
     iex>UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:never_find_me, :success, self())
     {:error, :notification_not_found}
@@ -48,8 +48,8 @@ defmodule UserManager.Notifications.NotificationRequestInitiator do
   get subscribers for a particular workflow/workflow_response_code
 
   ## Examples
-    iex>{:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:create_user, :test, self())
-    iex>Enum.count(UserManager.Notifications.NotificationRequestInitiator.get_subscribers(:create_user, :test)) == 1
+    iex>{:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:create_user, :validation_error, self())
+    iex>Enum.count(UserManager.Notifications.NotificationRequestInitiator.get_subscribers(:create_user, :validation_error)) == 1
     true
 
     iex>Enum.count(UserManager.Notifications.NotificationRequestInitiator.get_subscribers(:create_user, :not_found)) == 0

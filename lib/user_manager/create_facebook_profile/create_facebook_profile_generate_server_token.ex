@@ -26,13 +26,13 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileGenerateServerT
 
 """
   def handle_events(events, from, state) do
-    process_events = events |> UserManager.WorkflowProcessing.get_process_events(:process_access_token)
+    process_events = events
     |> Flow.from_enumerable
     |> Flow.flat_map(fn e -> process_event(e) end)
     |> Flow.flat_map(fn e -> parse_server_token(e) end)
     |> Enum.to_list
-    unprocessed_events = UserManager.WorkflowProcessing.get_unprocessed_events(events, :process_access_token)
-    {:noreply, process_events ++ unprocessed_events, []}
+
+    {:noreply, process_events, []}
   end
   defp process_event({:process_access_token, token, expire_time, user_id, notify}) do
     {response, status_code} = @facebook_proxy.get_server_token_from_access_key(token)

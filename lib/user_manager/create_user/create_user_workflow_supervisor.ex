@@ -11,9 +11,7 @@ defmodule UserManager.CreateUser.CreateUserWorkflowSupervisor.Supervisor do
       worker(UserManager.CreateUser.CreateUserWorkflowProducer, [:ok]),
       worker(UserManager.CreateUser.CreateUserDataValidator, [:ok]),
       worker(UserManager.CreateUser.CreateUserRepoInsert, [:ok]),
-      worker(UserManager.CreateUser.CreateUserPermissions, [:ok]),
-#      worker(UserManager.CreateUser.CreateUserNotificationFormatter, [:ok]),
-#      worker(UserManager.CreateUser.CreateUserNotification, [:ok])
+      worker(UserManager.CreateUser.CreateUserPermissions, [:ok])
     ]
     supervise(children, strategy: :one_for_one)
   end
