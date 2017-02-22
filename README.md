@@ -45,6 +45,10 @@ export FACEBOOK_CLIENT_ID="your app client id"
 
 UserManager.UserManagerApi.create_user(name, password, email)
 
+* Delete User
+
+UserManager.UserManagerApi.delete_user(user_id)
+
 * Authenticate User
 
 UserManager.UserManagerApi.authenticate_user(name, password, source \\ :browser)

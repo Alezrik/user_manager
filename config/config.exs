@@ -23,7 +23,8 @@ config :user_manager,
                                                               :access_token_validation_error, :server_token_validation_error,
                                                               :validation_error, :success]},
                                    {:create_user, [:success, :validation_error, :update_error]},
-                                   {:identify_user, [:token_not_found, :token_decode_error, :user_deserialize_error, :success]}]
+                                   {:identify_user, [:token_not_found, :token_decode_error, :user_deserialize_error, :success]},
+                                   {:user_crud, [:delete]}]
 
 config :guardian, Guardian,
   allowed_algos: ["HS512"], # optional

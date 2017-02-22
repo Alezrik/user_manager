@@ -71,4 +71,7 @@ defmodule UserManager.UserManagerApi do
       end
      end) |> Task.await(Application.get_env(:user_manager, :facebook_profile_timeout))
   end
+  def delete_user(user_id) do
+    UserManager.UserRepo.delete_user(user_id)
+  end
 end

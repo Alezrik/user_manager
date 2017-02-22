@@ -63,6 +63,9 @@ defmodule UserManager.Notifications.NotificationResponseProcessor do
     response = build_response(workflow, workflow_response_code, notification_metadata)
     send_notification(response, response_pid)
   end
+  defp send_notification(response, pid) when is_nil(pid) do
+
+  end
   defp send_notification(response, pid) do
     Process.send(pid, {:notify, response}, [])
   end
