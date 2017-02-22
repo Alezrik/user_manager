@@ -28,7 +28,7 @@ defmodule UserManager.CreateUser.CreateUserRepoInsert do
     {:noreply, process_events, state}
   end
   defp process_event({:insert_user, user_changeset, notify}) do
-    case Repo.insert(user_changeset) do
+    case UserManager.RepoWriteProxy.insert_user(user_changeset) do
       {:ok, user} -> [{:insert_permissions, user, notify}]
       {:error, changeset} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_user, :insert_error, UserManager.Notifications.NotificationMetadataHelper.build_changeset_validation_error(:user, changeset), notify)
                               []

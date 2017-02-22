@@ -25,7 +25,7 @@ defmodule UserManager.CreateFacebookProfile.CreateFacebookProfileRepoUpdate do
       {:noreply, process_events, state}
     end
     def write_record({:write_record, user_profile_changeset, token, expire_time, _user_id, notify}) do
-      case Repo.update(user_profile_changeset) do
+      case UserManager.RepoWriteProxy.update_user_profile(user_profile_changeset) do
         {:error, changeset} -> UserManager.Notifications.NotificationResponseProcessor.process_notification(:create_facebook_profile, :validation_error, UserManager.Notifications.NotificationMetadataHelper.build_changeset_validation_error(:user_profile, changeset), notify)#{:repo_error, changeset, user_id, notify}
                                 []
         {:ok, _item} ->

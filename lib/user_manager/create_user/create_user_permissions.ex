@@ -46,12 +46,12 @@ defmodule UserManager.CreateUser.CreateUserPermissions do
       |> Repo.preload(:users)
       user_list = [user | permission.users]
       changeset = permission |> Permission.changeset(%{}) |> put_assoc(:users, user_list)
-      update_repo(changeset)
+      update_repo(changeset, user)
      end)
      {{:insert_permissions, user, notify}, event_permissions_inserts}
   end
-  defp update_repo(changeset) do
-    case Repo.update(changeset) do
+  defp update_repo(changeset, user) do
+    case UserManager.RepoWriteProxy.update_permission(changeset, user) do
       {:ok, update_permission} -> {:ok, update_permission}
       {:error, changeset} -> {:update_error, changeset}
      end

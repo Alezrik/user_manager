@@ -82,7 +82,7 @@ defmodule UserManager.UserRepo do
     end
   def handle_call({:create_user_notify, user_id}, _from, state) do
     metadata = user_id.response_parameters
-    user = Map.fetch!(metadata, "created_object")
+    user = Map.fetch!(metadata, "user")
     add_user = UserManager.Struct.User.load_user(user.id)
     {:reply, add_user, [add_user | Enum.filter(state, fn s -> s.user_schema_id != user.id end)]}
   end
@@ -111,19 +111,14 @@ defmodule UserManager.UserRepo do
   def handle_info({:notify, notification}, state) do
     case notification.notification_type do
       :update ->
-       Logger.debug "initial state: #{inspect state}"
        user = Map.fetch!(notification.response_parameters, "user")
        update_state =  [UserManager.Struct.User.load_user(user.id) | Enum.filter(state, fn s -> s.user_schema_id != user.id end)]
-       Logger.debug "update_state: #{inspect update_state}"
        {:noreply, update_state}
       :delete ->
         id = Map.fetch!(notification.response_parameters, "id")
-        Logger.debug "delete state: #{inspect state} , id: #{inspect id}"
-
         update_state = Enum.filter(state, fn  s ->  s.user_schema_id != id end)
-        Logger.debug "update delete state: #{inspect update_state}, id: #{inspect id}"
-      {:noreply, update_state}
-      :success -> {:reply, _, update_state} = handle_call({:create_user_notify, notification}, nil, state)
+       {:noreply, update_state}
+      :create -> {:reply, _, update_state} = handle_call({:create_user_notify, notification}, nil, state)
                   {:noreply, update_state}
     end
   end
