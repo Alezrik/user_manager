@@ -15,11 +15,11 @@ This module is a collection of GenStage work-flows for managing Users and User A
 
 ## Installation
 
-https://hex.pm/packages/user_manager/0.1.0
+https://hex.pm/packages/user_manager/0.2.0
 
 ```elixir
 def deps do
-  [{:user_manager, "~> 0.1.0"}]
+  [{:user_manager, "~> 0.2.0"}]
 end
 ```
 
@@ -71,6 +71,9 @@ UserManager.UserManagerApi.create_facebook_profile(user_id, facebook_code_token)
   * Additional token validation / db serialization of token data
 * Comeonin - https://github.com/riverrun/comeonin
   * Validated field encryption with bcrypt
+* Facebook - https://github.com/mweibel/facebook.ex
+* httpoison - https://github.com/edgurgel/httpoison
+* Cipher - https://github.com/rubencaro/cipher
 
 ## Scope
 
@@ -82,7 +85,7 @@ goals:
 
 ## Documentation
 
-https://hexdocs.pm/user_manager/0.1.0
+https://hexdocs.pm/user_manager/0.2.0
 
 ## Blog
 https://excavationofimagination.wordpress.com/
