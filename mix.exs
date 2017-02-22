@@ -3,7 +3,7 @@ defmodule UserManager.Mixfile do
 
   def project do
     [app: :user_manager,
-     version: "0.2.0",
+     version: "0.3.0",
      elixir: "~> 1.4",
      description: description(),
      build_embedded: Mix.env == :prod,

@@ -10,8 +10,8 @@
 This module is a collection of GenStage work-flows for managing Users and User Accounts.
 
 ## Versions
-* hex_version: 0.1.0
-* git_master_version: 0.2.0
+* hex_version: 0.2.0
+* git_master_version: 0.3.0
 
 ## Installation
 
