@@ -26,9 +26,8 @@ defmodule UserManager.RepoWriteProxy do
             u = UserSchema
             |> where(id: ^user.id)
             |> Repo.one!
-            Task.await(Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
-              UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :update, %{"user" => u}, %UserManager.Struct.Notification{destination_pid: self()})
-            end), Application.get_env(:user_manager, :syncronous_api_timeout))
+            UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :update, %{"user" => u})
+            UserManager.Notifications.NotificationResponseProcessor.flush()
             {:ok, update_permission}
           {:error, ch} -> {:error, ch}
     end
@@ -39,9 +38,8 @@ defmodule UserManager.RepoWriteProxy do
       {:error, changeset} -> {:error, changeset}
       {:ok, profile} ->
         p = Repo.preload(profile, :user_schema)
-        Task.await(Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
-          UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :update, %{"user" => p.user_schema}, %UserManager.Struct.Notification{destination_pid: self()})
-        end), Application.get_env(:user_manager, :syncronous_api_timeout))
+          UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :update, %{"user" => p.user_schema})
+          UserManager.Notifications.NotificationResponseProcessor.flush()
         {:ok, profile}
     end
     {:reply, response, state}
@@ -49,12 +47,8 @@ defmodule UserManager.RepoWriteProxy do
   def handle_call({:insert_user, user}, _from, state) do
      response = case Repo.insert(user) do
         {:ok, user} ->
-        Task.await(Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
-          UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :create, %{"user" => user}, %UserManager.Struct.Notification{destination_pid: self()})
-          receive do
-            msg -> msg
-          end
-        end), Application.get_env(:user_manager, :syncronous_api_timeout))
+          UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :create, %{"user" => user})
+          UserManager.Notifications.NotificationResponseProcessor.flush()
         {:ok, user}
         {:error, changeset} -> {:error, changeset}
       end
