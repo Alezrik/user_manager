@@ -66,8 +66,10 @@ defmodule UserManager.UserRepo do
     Logger.debug "getuser state: #{inspect state}"
     response = Enum.filter(state, fn u ->
       provider = Enum.filter(u.authenticate_providers, fn provider ->
-        {_, name, _, _} = provider
-        name == authentication_name
+        case provider do
+          {:credential, name, _, _} -> name == authentication_name
+          other -> false
+        end
        end)
        Enum.count(provider) > 0
      end)
