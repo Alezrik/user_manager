@@ -17,14 +17,8 @@ defmodule UserManager.Notifications.NotificationResponseProcessor do
               notification_metadata,
               notify})
   end
-  def flush() do
-    GenServer.call(UserManager.Notifications.NotificationResponseProcessor, {:flush})
-  end
   def init(_opts) do
     {:ok, UserManager.Notifications.NotificationRequestInitiator.get_workflow_and_codes_map()}
-  end
-  def handle_call({:flush}, _from, state) do
-    {:reply, :ok, state}
   end
   def handle_cast({:process_notification, workflow, notification_code, notification_metadata, notify}, state) when is_nil(notify) do
     validate = state

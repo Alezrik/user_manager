@@ -103,6 +103,7 @@ defmodule UserManager.UserRepo do
     end
   end
   defp process_crud_notification(command, metadata) do
+   Logger.debug "user_repo sending: #{inspect command} with metadata: #{inspect metadata}"
    Task.await(Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
     UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, command, metadata, %UserManager.Struct.Notification{destination_pid: self()})
     receive do

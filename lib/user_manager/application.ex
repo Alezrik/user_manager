@@ -13,6 +13,7 @@ defmodule UserManager.Application do
       # worker(UserManager.Worker, [arg1, arg2, arg3]),
       worker(UserManager.Repo, []),
       worker(UserManager.RepoWriteProxy, [:ok, [name: UserManager.RepoWriteProxy]]),
+      worker(UserManager.UserQueryRepo, [:ok, [name: UserManager.UserQueryRepo]]),
       worker(UserManager.UserRepo, [:ok, [name: UserManager.UserRepo]]),
       worker(UserManager.PermissionRepo, [:ok, [name: UserManager.PermissionRepo]]),
       supervisor(UserManager.Authenticate.AuthenticateWorkflowSupervisor.Supervisor, [:ok]),
@@ -33,6 +34,10 @@ defmodule UserManager.Application do
     {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:user_crud, :create, Process.whereis(UserManager.UserRepo))
     {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:user_crud, :delete, Process.whereis(UserManager.UserRepo))
     {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:user_crud, :update, Process.whereis(UserManager.UserRepo))
+    {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:user_crud, :create, Process.whereis(UserManager.UserQueryRepo))
+    {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:user_crud, :delete, Process.whereis(UserManager.UserQueryRepo))
+    {:ok, _} = UserManager.Notifications.NotificationRequestInitiator.register_static_notification(:user_crud, :update, Process.whereis(UserManager.UserQueryRepo))
+
     {:ok, pid}
   end
 end

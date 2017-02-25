@@ -26,8 +26,12 @@ defmodule UserManager.RepoWriteProxy do
             u = UserSchema
             |> where(id: ^user.id)
             |> Repo.one!
-            UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :update, %{"user" => u})
-            UserManager.Notifications.NotificationResponseProcessor.flush()
+            Task.await(Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
+            UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :update, %{"user" => u}, %UserManager.Struct.Notification{destination_pid: self()})
+            receive do
+              m -> m
+            end
+            end))
             {:ok, update_permission}
           {:error, ch} -> {:error, ch}
     end
@@ -38,8 +42,12 @@ defmodule UserManager.RepoWriteProxy do
       {:error, changeset} -> {:error, changeset}
       {:ok, profile} ->
         p = Repo.preload(profile, :user_schema)
-          UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :update, %{"user" => p.user_schema})
-          UserManager.Notifications.NotificationResponseProcessor.flush()
+        Task.await(Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
+        UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :update, %{"user" => p.user_schema}, %UserManager.Struct.Notification{destination_pid: self()})
+        receive do
+          m -> m
+        end
+        end))
         {:ok, profile}
     end
     {:reply, response, state}
@@ -47,8 +55,12 @@ defmodule UserManager.RepoWriteProxy do
   def handle_call({:insert_user, user}, _from, state) do
      response = case Repo.insert(user) do
         {:ok, user} ->
-          UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :create, %{"user" => user})
-          UserManager.Notifications.NotificationResponseProcessor.flush()
+          Task.await(Task.Supervisor.async(UserManager.Task.Supervisor, fn ->
+          UserManager.Notifications.NotificationResponseProcessor.process_notification(:user_crud, :create, %{"user" => user}, %UserManager.Struct.Notification{destination_pid: self()})
+          receive do
+            m -> m
+          end
+         end))
         {:ok, user}
         {:error, changeset} -> {:error, changeset}
       end

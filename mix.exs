@@ -40,7 +40,7 @@ defmodule UserManager.Mixfile do
         {:guardian_db, "~> 0.8.0"}, {:faker, "~> 0.7"}, {:credo, "~> 0.5", only: [:dev, :test]},
         {:dialyxir, "~> 0.4", only: [:dev], runtime: false}, {:gen_stage, "~> 0.11"}, {:flow, "~> 0.11"}, {:ex_doc, "~> 0.14", only: :dev}, {:comeonin, "~> 3.0"},
         {:excoveralls, "~> 0.6", only: :test}, {:exprof, "~> 0.2.0"}, {:inch_ex, only: :docs},
-        {:facebook, "~> 0.9.0"}, {:cipher, ">= 1.3.0"}, {:httpoison, "~> 0.10.0"}]
+        {:facebook, "~> 0.9.0"}, {:cipher, ">= 1.3.0"}, {:httpoison, "~> 0.10.0"}, {:amnesia, "~> 0.2.5"}]
   end
 
   defp aliases do
